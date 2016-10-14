@@ -14,7 +14,12 @@ if((isset($_POST["paisCola"]))&&($_POST["paisCola"]!="")){ trim($paisCola=strip_
 if((isset($_POST["descripcion"]))&&($_POST["descripcion"]!="")){ trim($descripcion=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["descripcion"])))); } else {$aErrores[] = "Debe colocar una descripción de la cola que está agregando";}
 
 if((isset($_POST["estatus"]))&&($_POST["estatus"]!="")){ trim($estatus=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatus"])))); } else { $estatus=0; }
-if((isset($_POST["estatusOperadora"]))&&($_POST["estatusOperadora"]!="")){ trim($estatusOperadora=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusOperadora"])))); } else { $estatusOperadora=0;}
+
+//GET OPERATOR REQUIRED
+if((isset($_POST["estatusOperadora"]))&&($_POST["estatusOperadora"]!="")){ $estatusOperadora=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusOperadora"]))); } else { $estatusOperadora=0;}
+
+//GETREPLYTO REQUIERES
+if((isset($_POST["estatusReplyTo"]))&&($_POST["estatusReplyTo"]!="")){ trim($estatusReplyTo=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusReplyTo"])))); } else { $estatusReplyTo=0;}
 
 if((isset($_POST["operadora"]))&&($_POST["operadora"]!="")){ $operadora=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["operadora"]))); } else { $operadora=Null;}
 
@@ -32,40 +37,58 @@ if((isset($_POST["class_count"]))&&($_POST["class_count"]!="")){ $class_count=st
 
 
 
+if ( !empty($_POST["desdeRango"]) && is_array($_POST["desdeRango"]) ) { 
+	foreach ( $_POST["desdeRango"] as $como ) { 
+		$var.=":".$como; 
+	}
+}
+
+if ( !empty($_POST["hastaRango"]) && is_array($_POST["hastaRango"]) ) { 
+	foreach ( $_POST["hastaRango"] as $comoH ) { 
+		$varH.=":".$comoH; 
+	}
+}
 
 
+//GET PORTABILITY CHECK
+if((isset($_POST["estatusPortabilidad"]))&&($_POST["estatusPortabilidad"]!="")){ $estatusPortabilidad=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusPortabilidad"]))); } else { $estatusPortabilidad=0;}
+
+
+
+	//GET NUMEROS PORTADOS
+
+if((isset($_POST["numerosPortados"]))&&($_POST["numerosPortados"]!="")){ $numerosPortados=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["numerosPortados"]))); } else { $numerosPortados=0;}
 
 
 $fechacompleta=date('Y-m-d H:i:s');
-/*
-//VALIDANDO QUE NO EXISTA EN LA BD
-$SQL_val="SELECT m_pasaporte_id FROM m_pasaportes WHERE m_pasaporte_name='$namePassport'";
-$queryVal=mysqli_query($link, $SQL_val);
-$validado=mysqli_num_rows($queryVal);
-if ($validado>0) {
-	$aErrores="ESTE PASAPORTE YA SE ENCUENTRA REGISTRADO";
-}
-*/
 if(count($aErrores)==0) { 
 
-	/*$query = "INSERT INTO m_pasaportes (m_pasaporte_id, m_pasaporte_name, m_pasaporte_description, m_pasaporte_estatus, m_pasaporte_createdAt, m_pasaporte_updatedAt) VALUES (Null, '$namePassport', '$descripcion', '1', Now(), Now())";
-	$resultado = mysqli_query($link, $query);
-	$lastshit=mysqli_insert_id($link);
-*/
-
-	foreach ($_POST['pasaportesPermitidos'] as $names)
-{
-        $permitudos.=$names." / ";
-}
 
 
-	$resultado=true;
+
+	$SQL="INSERT INTO  routingDB.m_cola (m_cola_id ,m_cola_name ,m_cola_description ,m_cola_idBloque, m_cola_requiredOperadora, m_cola_operadoraID ,m_cola_comentRequiere ,m_cola_claveComentario ,m_cola_getreplaytoRequire ,m_cola_estatus ,m_cola_date ,
+	m_cola_updatedat)VALUES (NULL ,  '$nameCola',  '$descripcion',  '$idBloque',  '$estatusOperadora',  '$operadora',  '$estatusComment',  '$keyComments',  '$estatusReplyTo',  '$estatus',  Now(),  Now())";
+	$resultado=mysqli_query($link, $SQL);
+	$lastId=mysqli_insert_id($link);
+
+	$pasaportesCant=count($_POST["pasaportesPermitidos"]);
+
+	if ($pasaportesCant>0) {
+		foreach ($_POST['pasaportesPermitidos'] as $idPass)
+		{
+			$SQLPass="INSERT INTO r_colas_pasaportes (r_cola_pasaporte_id, r_cola_pasaporte_idCola, r_cola_pasaporte_idPasaporte, r_cola_pasaporte_creartedAt) VALUES (Null, '$lastId', '$idPass', Now())";
+			$queryPass=mysqli_query($link, $SQLPass);
+		}
+	}
+
+
 	if ($resultado) {
+
 
 		//Envío la respuesta al Front para redirigir
 		$jsondata["success"] = true;
 		$jsondata["data"] = array(
-			'message' => "$idBloque + $nameCola + $paisCola + $descripcion + $permitudos + $estatus + Requiere Operadora: $estatusOperadora + $operadora + Req comentario: $estatusComment > $keyComments + Tiene Rango: $estatusRango + Cantidad Rango: $class_count"
+			'message' => "$SQLPass"
 			);
 
 

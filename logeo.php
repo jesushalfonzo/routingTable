@@ -25,6 +25,8 @@ function curPageURL() {
 
 
 if ($variable != 'tDXOp3racionesRY'){
+	
+	$aErrores[] = "Su sessión se ha vencido, por favor actualice su navegador y vuelva a ingresar";
 	echo "<script language='JavaScript'>parent.location.href='".$serveractual."/index.php';</script>";
 }
 else{  

@@ -50,8 +50,8 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
           </div>
           <div class="clearfix"></div>
 
-
-          <div class="row">
+         <form class="form-horizontal form-label-left" id="formCola" name="formCola" enctype="multipart/form-data" >
+  <div class="row">
             <div class="col-md-12 col-xs-12">
               <div class="x_panel">
                 <div class="x_title">
@@ -69,9 +69,6 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                 </div>
                 <div class="x_content">
 
-
-                  <br />
-                  <form class="form-horizontal form-label-left" id="formCola" name="formCola" enctype="multipart/form-data" >
                     <input type="hidden" name="idBloque" value="<?=$idBlock?>">
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
                     <label>Identificador de la cola</label>
@@ -138,6 +135,15 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                        <label id="estatusText" for="estatus">Inactiva</label>
                      </div>
                    </div>
+
+                    <div class="col-md-3 col-sm-3 col-xs-12">
+                      <label for="message"> ¿Requiere Respuesta NO Nula?</label>
+                      <div class="radio" id="ReplyToRadio">
+
+                       <input type="checkbox" class="js-switch" id="estatusReplyTo" name="estatusReplyTo" value="1"/>  
+                       <label id="ReplyToText" for="EstatusReplyTo">NO</label>
+                     </div>
+                   </div>
                    <div class="col-md-3 col-sm-3 col-xs-12">
                     <label for="message">¿Requiere Operadora? :</label>
                     <div class="radio" id="OperadoraRadio">
@@ -149,9 +155,17 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                     <label>Seleccione Operadora</label>
                     <select class="select2_single form-control" name="operadora" id="operadora" tabindex="-1">
                       <option></option>
-                      <option value="1">Movilnet</option>
-                      <option value="2">Digitel</option>
-                      <option value="3">Movistar</option>
+                      <?php 
+
+                      $SQLOperadoras="SELECT m_operadora_id, m_operadora_nombre FROM m_operadoras ORDER BY m_operadora_nombre ASC";
+                      $queryOperadora=mysqli_query($link, $SQLOperadoras);
+                      while ($rowOperadoras=mysqli_fetch_array($queryOperadora)) {
+                        $m_operadora_id=$rowOperadoras["m_operadora_id"];
+                        $m_operadora_nombre=$rowOperadoras["m_operadora_nombre"];
+                      
+                      ?>
+                      <option value="<?=$m_operadora_id?>"><?=$m_operadora_nombre?></option>
+                      <?php } ?>
                     </select> 
                   </div>
                 </div>
@@ -169,6 +183,7 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                 </div>
 
 
+
               </div>
             </div>
             <div class="col-md-12 col-sm-12 col-xs-12">
@@ -183,12 +198,13 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
 
                  <div class="col-md-4 col-sm-12 col-xs-12 form-group">
                    <label>Desde</label>
-                   <input type="text" placeholder="Desde" name="desdeRango" id="desdeRango" class="form-control numeric input-sm">
+                   <input type="text" placeholder="Desde" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
                  </div>
                  <div class="col-md-4 col-sm-12 col-xs-12 form-group">
                   <label>Hasta</label>
-                  <input type="text" placeholder="Hasta" name="hastaRango" id="hastaRango" class="form-control numeric input-sm">
+                  <input type="text" placeholder="Hasta" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
                 </div>
+
 
                 <div id="actions" class="col-md-4 col-sm-12 col-xs-12 form-group">
                   <label><a href="#." id="addRango" title="Agregar nuevo rango"><i class="fa fa-plus-circle"></i>Agregar</a></label>
@@ -233,8 +249,11 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
               </div>
             </div>
 
-          </form>
         </div>
+
+         </form>
+
+        
       </div>
     </div>
 
@@ -308,6 +327,18 @@ $("#OperadoraRadio").click(function() {
 });
 //FIN OPERADORAS
 
+//MANEJO DEL CHECK DE GETREPLYTO
+$("#ReplyToRadio").click(function() {
+  if ($('#estatusReplyTo').prop('checked')) {
+   $("#ReplyToText").html("<b>SÍ</b>");
+ }
+ else{
+  $("#ReplyToText").html("<b>NO</b>");
+  hideBox("operadorasNum");
+}
+});
+//FIN OPERADORAS
+
 //PARA MANEJO DEL CHECK DE COMENTARIOS
 $("#commentRadio").click(function() {
   if ($('#estatusComment').prop('checked')) {
@@ -345,22 +376,21 @@ else
 {
   var i=0;
 }
-
 $("#addRango").click(function(){
+  i =$("#class_count").val();
   $('#rangoForm').before($("#rangoForm").clone().attr("id","rangoForm" + i));
   $("#rangoForm" + i).css("display","block");
   $("#rangoForm" + i +"> div >label>a#addRango").css("display", "none");
   $("#rangoForm> div >:input").val("");
   $("#rangoForm" + i + " :input").each(function(){
-    $(this).attr("name",$(this).attr("name") + i);
+    //$(this).attr("name",$(this).attr("name") + i);
     $(this).attr("id",$(this).attr("id") + i);
     $(this).attr("count",i); 
-    //$(this).closest(".addcomp").remove();
 
   });
-  //$("input[name=class_count]").remove();
-  //$('#rangoForm').append('<input type="hidden" id="class_count" class="class_count" name="class_count" value="'+i+'" />');
-  $("#class_count").val(parseInt(i)+1);
+  $("#class_count").val(parseInt($("#class_count").val())+1);
+
+
   $("#rangoForm" + i+" > div > :input.input-sm").each(function(){
     $(this).rules("add", {
       required: true
@@ -440,9 +470,7 @@ $("#PortabilidadRadio").click(function() {
     }
     );
 
-  </script>
-  <script>
-    $(function() {
+  $(function() {
 
       $("#formCola").validate({
 
@@ -458,9 +486,8 @@ $("#PortabilidadRadio").click(function() {
       },
 
       submitHandler: function(form) {
-
+        $(document).find("#formCola").trigger("create");
        var formData = new FormData($("#formCola")[0]);
-
 
        $.ajax({
         url: "addCola.php",
