@@ -23,6 +23,12 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
   <script src="../js/fileinput.js" type="text/javascript"></script>
   <!-- Select2 -->
   <link href="../vendors/select2/dist/css/select2.min.css" rel="stylesheet">
+  <style type="text/css">
+    #pasaportesPortadosDiv >span{
+      width: 100% !important;
+      margin-bottom: 20px !important;
+    }
+  </style>
 </head>
 
 
@@ -50,28 +56,28 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
           </div>
           <div class="clearfix"></div>
 
-         <form class="form-horizontal form-label-left" id="formCola" name="formCola" enctype="multipart/form-data" >
-  <div class="row">
-            <div class="col-md-12 col-xs-12">
-              <div class="x_panel">
-                <div class="x_title">
-                  <h2>Cola correspondiente al bloque <?=utf8_encode($m_bloque_nombre)?></h2>
-                  <ul class="nav navbar-right panel_toolbox">
-                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                    </li>
+          <form class="form-horizontal form-label-left" id="formCola" name="formCola" enctype="multipart/form-data" >
+            <div class="row">
+              <div class="col-md-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_title">
+                    <h2>Cola correspondiente al bloque <?=utf8_encode($m_bloque_nombre)?></h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                      <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                      </li>
 
-                  </ul>
-                  <div class="clearfix"></div>
-                </div>
+                    </ul>
+                    <div class="clearfix"></div>
+                  </div>
 
-                <div id="mensajes">
+                  <div id="mensajes">
 
-                </div>
-                <div class="x_content">
+                  </div>
+                  <div class="x_content">
 
                     <input type="hidden" name="idBloque" value="<?=$idBlock?>">
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
-                    <label>Identificador de la cola</label>
+                      <label>Identificador de la cola</label>
                       <span class="fa fa-tasks form-control-feedback left" aria-hidden="true"></span>
                       <input type="text" name="nameCola" class="form-control has-feedback-left" id="nameCola" placeholder="Nombre de la cola">
                       
@@ -81,62 +87,62 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                     <div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback">
                       <label>País</label>
                       <select name="paisCola" class="form-control">
-                      <option>Seleccione</option>
-                       <?php 
-                       $SqlCountry="SELECT short_name, country_id FROM country_t ORDER BY short_name ASC";
-                       $queryCountry=mysqli_query($link, $SqlCountry);
-                       while ($rowCountry=mysqli_fetch_array($queryCountry)) {
+                        <option>Seleccione</option>
+                        <?php 
+                        $SqlCountry="SELECT short_name, country_id FROM country_t ORDER BY short_name ASC";
+                        $queryCountry=mysqli_query($link, $SqlCountry);
+                        while ($rowCountry=mysqli_fetch_array($queryCountry)) {
                          $short_name=$rowCountry["short_name"];
                          $country_id=$rowCountry["country_id"];
-                       
-                       ?>
-                       <option value="<?=$country_id?>"><?=$short_name?></option>
-                       <?php } ?>
-                      </select>
-                      
-                    </div>
 
-                    <div class="col-md-12 col-sm-12 col-xs-12 form-group has-feedback">
-                     <span class="fa fa-file-text-o form-control-feedback right" aria-hidden="true"></span>
-                     <textarea class="resizable_textarea form-control" name="descripcion" id="descripcion" placeholder="Descripción de la cola (Si aplíca)" style="overflow: hidden; word-wrap: break-word; resize: horizontal; height: 74px;"></textarea>                
-                   </div>
+                         ?>
+                         <option value="<?=$country_id?>"><?=$short_name?></option>
+                         <?php } ?>
+                       </select>
+
+                     </div>
+
+                     <div class="col-md-12 col-sm-12 col-xs-12 form-group has-feedback">
+                       <span class="fa fa-file-text-o form-control-feedback right" aria-hidden="true"></span>
+                       <textarea class="resizable_textarea form-control" name="descripcion" id="descripcion" placeholder="Descripción de la cola (Si aplíca)" style="overflow: hidden; word-wrap: break-word; resize: horizontal; height: 74px;"></textarea>                
+                     </div>
 
 
-                   <div class="form-group">
-                    <label class="control-label col-md-3 col-sm-3 col-xs-12" style="text-align: left;">Seleccione los pasaportes permitidos</label>
-                    <div class="col-md-12 col-sm-12 col-xs-12">
-                      <select name="pasaportesPermitidos[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPermitidos">
+                     <div class="form-group">
+                      <label class="control-label col-md-3 col-sm-3 col-xs-12" style="text-align: left;">Seleccione los pasaportes permitidos</label>
+                      <div class="col-md-12 col-sm-12 col-xs-12">
+                        <select name="pasaportesPermitidos[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPermitidos">
 
-                        <?php 
-                        $SQL_pasaportes="SELECT * FROM m_pasaportes WHERE m_pasaporte_estatus='1' ORDER BY m_pasaporte_name ASC";
-                        $query_pasaportes=mysqli_query($link, $SQL_pasaportes);
-                        while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
-                          $m_pasaporte_id=$row_pasaportes["m_pasaporte_id"];
-                          $m_pasaporte_name=$row_pasaportes["m_pasaporte_name"];
+                          <?php 
+                          $SQL_pasaportes="SELECT * FROM m_pasaportes WHERE m_pasaporte_estatus='1' ORDER BY m_pasaporte_name ASC";
+                          $query_pasaportes=mysqli_query($link, $SQL_pasaportes);
+                          while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
+                            $m_pasaporte_id=$row_pasaportes["m_pasaporte_id"];
+                            $m_pasaporte_name=$row_pasaportes["m_pasaporte_name"];
 
-                          ?>
-                          <option value="<?=$m_pasaporte_id?>"><?=$m_pasaporte_name?></option>
-                          <?php } ?>
-                        </select>
+                            ?>
+                            <option value="<?=$m_pasaporte_id?>"><?=$m_pasaporte_name?></option>
+                            <?php } ?>
+                          </select>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
 
-                  <div class="form-group">
+                    <div class="form-group">
 
 
 
-                    <div class="col-md-3 col-sm-3 col-xs-12">
-                      <label for="message">Estatus de la cola :</label>
-                      <div class="radio" id="EstatusRadio">
+                      <div class="col-md-3 col-sm-3 col-xs-12">
+                        <label for="message">Estatus de la cola :</label>
+                        <div class="radio" id="EstatusRadio">
 
-                       <input type="checkbox" class="js-switch" id="estatus" name="estatus" value="1"/>  
-                       <label id="estatusText" for="estatus">Inactiva</label>
+                         <input type="checkbox" class="js-switch" id="estatus" name="estatus" value="1"/>  
+                         <label id="estatusText" for="estatus">Inactiva</label>
+                       </div>
                      </div>
-                   </div>
 
-                    <div class="col-md-3 col-sm-3 col-xs-12">
+                     <div class="col-md-3 col-sm-3 col-xs-12">
                       <label for="message"> ¿Requiere Respuesta NO Nula?</label>
                       <div class="radio" id="ReplyToRadio">
 
@@ -162,80 +168,97 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                       while ($rowOperadoras=mysqli_fetch_array($queryOperadora)) {
                         $m_operadora_id=$rowOperadoras["m_operadora_id"];
                         $m_operadora_nombre=$rowOperadoras["m_operadora_nombre"];
-                      
-                      ?>
-                      <option value="<?=$m_operadora_id?>"><?=$m_operadora_nombre?></option>
-                      <?php } ?>
-                    </select> 
+
+                        ?>
+                        <option value="<?=$m_operadora_id?>"><?=$m_operadora_nombre?></option>
+                        <?php } ?>
+                      </select> 
+                    </div>
                   </div>
+
+                  <div class="col-md-3 col-sm-3 col-xs-12">
+                    <label for="message">¿Requiere Comentario? :</label>
+                    <div class="radio" id="commentRadio">
+
+                     <input type="checkbox" class="js-switch" id="estatusComment" name="estatusComment" value="1"/>  
+                     <label id="commentText" for="estatusComment">NO</label>
+                   </div>
+                   <div class="radio" id="commentariosKey" style="display: none;">
+                    <label>Palabra Clave</label>
+                    <input type="text" name="keyComments" class="form-control has-feedback-left" id="keyComments" placeholder="Palabra clave">  
+                  </div>
+
+
+
                 </div>
+              </div>
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <label for="message">¿Requiere Definir Rangos? :</label>
+                <div class="radio" id="radioRango">
 
-                <div class="col-md-3 col-sm-3 col-xs-12">
-                  <label for="message">¿Requiere Comentario? :</label>
-                  <div class="radio" id="commentRadio">
+                 <input type="checkbox" class="js-switch" id="estatusRango" name="estatusRango" value="1"/>  
+                 <label id="rangoText" for="estatusRango">NO</label>
+               </div>
+               <div id="masterRango" class="col-md-12 col-sm-12 col-xs-12" style="display: none;">
+                 <div class="row rangoForm" id="rangoForm"  >
 
-                   <input type="checkbox" class="js-switch" id="estatusComment" name="estatusComment" value="1"/>  
-                   <label id="commentText" for="estatusComment">NO</label>
-                 </div>
-                 <div class="radio" id="commentariosKey" style="display: none;">
-                  <label>Palabra Clave</label>
-                  <input type="text" name="keyComments" class="form-control has-feedback-left" id="keyComments" placeholder="Palabra clave">  
+                   <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                     <label>Desde</label>
+                     <input type="text" placeholder="Desde" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
+                   </div>
+                   <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                    <label>Hasta</label>
+                    <input type="text" placeholder="Hasta" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
+                  </div>
+
+
+                  <div id="actions" class="col-md-4 col-sm-12 col-xs-12 form-group">
+                    <label><a href="#." id="addRango" title="Agregar nuevo rango"><i class="fa fa-plus-circle"></i>Agregar</a></label>
+                    | <label><a href="#." id="hide_company" title="Eliminar rango"><i class="fa fa-plus-circle"></i>Eliminar</a></label>
+
+                    <input type="text" readonly="yes"  placeholder="" class="form-control" style="background-color: #FFFFFF; border: none;">
+
+
+                  </div>
+
                 </div>
-
-
 
               </div>
-            </div>
-            <div class="col-md-12 col-sm-12 col-xs-12">
-              <label for="message">¿Requiere Definir Rangos? :</label>
-              <div class="radio" id="radioRango">
+              <input type="hidden" id="start_count_value"  name="start_count_value" value="1" />
+              <input type="hidden" id="class_count" name="class_count" class="class_count" value="1" />
 
-               <input type="checkbox" class="js-switch" id="estatusRango" name="estatusRango" value="1"/>  
-               <label id="rangoText" for="estatusRango">NO</label>
-             </div>
-             <div id="masterRango" class="col-md-12 col-sm-12 col-xs-12" style="display: none;">
-               <div class="row rangoForm" id="rangoForm"  >
 
-                 <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                   <label>Desde</label>
-                   <input type="text" placeholder="Desde" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
-                 </div>
-                 <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                  <label>Hasta</label>
-                  <input type="text" placeholder="Hasta" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
+
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <label for="message">¿Requiere Portabilidad? :</label>
+                <div class="radio" id="PortabilidadRadio">
+
+                 <input type="checkbox" class="js-switch" id="estatusPortabilidad" name="estatusPortabilidad" value="1"/>  
+                 <label id="portabilidadText" for="estatusPortabilidad">NO</label>
+               </div>
+               <div class="radio" id="portabilidadNums" style="display: none;">
+
+                <div class="col-md-9 col-sm-9 col-xs-12">
+                  <label>Indique los números que desea portar (presionar enter por cada número)</label>
+                  <input id="tags_1" type="text" name="numerosPortados" class="tags form-control" value="" />
+                  <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
                 </div>
+                <div id="pasaportesPortadosDiv" class="col-md-9 col-sm-9  col-xs-12">
+                  <label>Seleccione los pasaportes a portar</label>
+                   <select name="pasaportesPortados[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPortados">
 
+                      <?php 
+                      $SQL_pasaportes="SELECT * FROM m_pasaportes WHERE m_pasaporte_estatus='1' ORDER BY m_pasaporte_name ASC";
+                      $query_pasaportes=mysqli_query($link, $SQL_pasaportes);
+                      while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
+                        $m_pasaporte_id=$row_pasaportes["m_pasaporte_id"];
+                        $m_pasaporte_name=$row_pasaportes["m_pasaporte_name"];
 
-                <div id="actions" class="col-md-4 col-sm-12 col-xs-12 form-group">
-                  <label><a href="#." id="addRango" title="Agregar nuevo rango"><i class="fa fa-plus-circle"></i>Agregar</a></label>
-                  | <label><a href="#." id="hide_company" title="Eliminar rango"><i class="fa fa-plus-circle"></i>Eliminar</a></label>
-
-                  <input type="text" readonly="yes"  placeholder="" class="form-control" style="background-color: #FFFFFF; border: none;">
-
-
+                        ?>
+                        <option value="<?=$m_pasaporte_id?>"><?=$m_pasaporte_name?></option>
+                        <?php } ?>
+                    </select>
                 </div>
-
-              </div>
-              
-            </div>
-            <input type="hidden" id="start_count_value"  name="start_count_value" value="1" />
-            <input type="hidden" id="class_count" name="class_count" class="class_count" value="1" />
-
-
-
-            <div class="col-md-12 col-sm-12 col-xs-12">
-              <label for="message">¿Requiere Portabilidad? :</label>
-              <div class="radio" id="PortabilidadRadio">
-
-               <input type="checkbox" class="js-switch" id="estatusPortabilidad" name="estatusPortabilidad" value="1"/>  
-               <label id="portabilidadText" for="estatusPortabilidad">NO</label>
-             </div>
-             <div class="radio" id="portabilidadNums" style="display: none;">
-
-              <div class="col-md-9 col-sm-9 col-xs-12">
-                <label>Indique los números que desea portar</label>
-                <input id="tags_1" type="text" name="numerosPortados" class="tags form-control" value="" />
-                <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
               </div>
             </div>
 
@@ -249,11 +272,11 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
               </div>
             </div>
 
-        </div>
+          </div>
 
-         </form>
+        </form>
 
-        
+
       </div>
     </div>
 
@@ -284,8 +307,8 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
 <!-- Select2 -->
 <script src="../vendors/select2/dist/js/select2.full.min.js"></script>
 <script type="text/javascript" src="../js/jquery.numeric.min.js"></script>
-  <!-- jQuery Tags Input -->
-    <script src="../vendors/jquery.tagsinput/src/jquery.tagsinput.js"></script>
+<!-- jQuery Tags Input -->
+<script src="../vendors/jquery.tagsinput/src/jquery.tagsinput.js"></script>
 
 <script type="text/javascript">
 
@@ -411,6 +434,8 @@ $("#PortabilidadRadio").click(function() {
   if ($('#estatusPortabilidad').prop('checked')) {
    $("#portabilidadText").html('<b>SÍ</b>');
    showBox("portabilidadNums");
+   $("#pasaportesPortadosDiv>span>span>span >ul>li>input").attr("placeholder", "Elegir pasaportes");
+   $("#pasaportesPortadosDiv>span>span>span >ul>li>input").css("width", "100%");
  }
  else{
   $("#portabilidadText").html("<b>NO</b>");
@@ -472,24 +497,24 @@ $("#PortabilidadRadio").click(function() {
 
   $(function() {
 
-      $("#formCola").validate({
+    $("#formCola").validate({
 
-       rules: {
-        nameCola: "required",
-        descripcion: "required",
-      },
+     rules: {
+      nameCola: "required",
+      descripcion: "required",
+    },
 
-      messages: {
-        nameCola: "Debe especificar un nombre para la cola",
-        descripcion: "Debe especificar una descripción para diferenciar los registros",
+    messages: {
+      nameCola: "Debe especificar un nombre para la cola",
+      descripcion: "Debe especificar una descripción para diferenciar los registros",
 
-      },
+    },
 
-      submitHandler: function(form) {
-        $(document).find("#formCola").trigger("create");
-       var formData = new FormData($("#formCola")[0]);
+    submitHandler: function(form) {
+      $(document).find("#formCola").trigger("create");
+      var formData = new FormData($("#formCola")[0]);
 
-       $.ajax({
+      $.ajax({
         url: "addCola.php",
         type: 'POST',
         enctype: 'multipart/form-data',
@@ -502,37 +527,37 @@ $("#PortabilidadRadio").click(function() {
           $("#mensajes").css("z-index", "999");
           $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
           $('#dataMessage').append(data['data']['message']);
-         // setTimeout(function() { window.location.href = 'listar.php';}, 1000);
-        } else{
-          $("#mensajes").css("z-index", "999");
-          $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
-          $('#dataMessage').append(data['data']['message']);
-          $.each(data['data']['message'], function(index, val) {
-            $('#dataMessage').append(val+ '<br>');
-          });
-          setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+         setTimeout(function() { window.location.href = 'listar.php?idBlock=<?=$idBlock?>';}, 1000);
+       } else{
+        $("#mensajes").css("z-index", "999");
+        $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+        $('#dataMessage').append(data['data']['message']);
+        $.each(data['data']['message'], function(index, val) {
+          $('#dataMessage').append(val+ '<br>');
+        });
+        setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
 
 
-        };
+      };
 
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) { 
-        alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-      } ,
-      cache: false,
-      contentType: false,
-      processData: false
-    });
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) { 
+      alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+    } ,
+    cache: false,
+    contentType: false,
+    processData: false
+  });
 
-     }
-   });
+    }
+  });
 
-    });
-
-
+  });
 
 
-  </script>
+
+
+</script>
 
 </body>
 </html>

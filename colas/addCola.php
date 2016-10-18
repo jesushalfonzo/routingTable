@@ -2,11 +2,13 @@
 include('../extras/conexion.php');
 $link=Conectarse();
 
-if (!control_access("PASAPORTES", 'AGREGAR')) { $aErrores[] = "USTED NO TIENE PERSIMO PARA REALIZAR ESTA ACCION";  }
+//CONTROL DE PERMISOS
+if (!control_access("ROUTING_TABLE", 'EDITAR')) { $aErrores[] = "USTED NO TIENE PERSIMO PARA REALIZAR ESTA ACCION";  }
 
 
 $aErrores=array();
 $jsondata = array();
+
 
 if((isset($_POST["idBloque"]))&&($_POST["idBloque"]!="")){ trim($idBloque=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["idBloque"])))); } else {$aErrores[] = "ERROR - No se ha indicado el identificador del bloque";}
 if((isset($_POST["nameCola"]))&&($_POST["nameCola"]!="")){ trim($nameCola=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["nameCola"])))); } else {$aErrores[] = "Debe especificar el identificador de la cola";}
@@ -37,19 +39,6 @@ if((isset($_POST["class_count"]))&&($_POST["class_count"]!="")){ $class_count=st
 
 
 
-if ( !empty($_POST["desdeRango"]) && is_array($_POST["desdeRango"]) ) { 
-	foreach ( $_POST["desdeRango"] as $como ) { 
-		$var.=":".$como; 
-	}
-}
-
-if ( !empty($_POST["hastaRango"]) && is_array($_POST["hastaRango"]) ) { 
-	foreach ( $_POST["hastaRango"] as $comoH ) { 
-		$varH.=":".$comoH; 
-	}
-}
-
-
 //GET PORTABILITY CHECK
 if((isset($_POST["estatusPortabilidad"]))&&($_POST["estatusPortabilidad"]!="")){ $estatusPortabilidad=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusPortabilidad"]))); } else { $estatusPortabilidad=0;}
 
@@ -64,13 +53,16 @@ $fechacompleta=date('Y-m-d H:i:s');
 if(count($aErrores)==0) { 
 
 
-
+//SAVE THE PRINCIPAL VALUES FOR THE CURRENT QUEUE
 
 	$SQL="INSERT INTO  routingDB.m_cola (m_cola_id ,m_cola_name ,m_cola_description ,m_cola_idBloque, m_cola_requiredOperadora, m_cola_operadoraID ,m_cola_comentRequiere ,m_cola_claveComentario ,m_cola_getreplaytoRequire ,m_cola_estatus ,m_cola_date ,
 	m_cola_updatedat)VALUES (NULL ,  '$nameCola',  '$descripcion',  '$idBloque',  '$estatusOperadora',  '$operadora',  '$estatusComment',  '$keyComments',  '$estatusReplyTo',  '$estatus',  Now(),  Now())";
 	$resultado=mysqli_query($link, $SQL);
 	$lastId=mysqli_insert_id($link);
 
+
+
+//PARA GUARDAR LOS PASAPORTES QUE PERMITE ESTA COLA
 	$pasaportesCant=count($_POST["pasaportesPermitidos"]);
 
 	if ($pasaportesCant>0) {
@@ -80,15 +72,61 @@ if(count($aErrores)==0) {
 			$queryPass=mysqli_query($link, $SQLPass);
 		}
 	}
+//FIN PASAPORTE COLA
+
+
+//PARA GUARDAR LOS RANGOS EN CASO DE QUE LA COLA LOS REQUIERA
+
+	if ($estatusRango) {
+	//GET RANGOS
+		if ((!empty($_POST["desdeRango"]) && is_array($_POST["desdeRango"]))AND !empty($_POST["hastaRango"]) && is_array($_POST["hastaRango"]) ) { 
+			foreach (array_combine($_POST["desdeRango"], $_POST["hastaRango"]) as $desde => $hasta) {
+		//SAVE RANGOS
+				$SQLRangos="INSERT INTO r_rangos_colas (r_rangos_cola_id, r_rangos_cola_idCola, r_rangos_cola_rangoDesde, r_rangos_cola_rangoHasta) VALUES (Null, '$lastId', '$desde', '$hasta')";
+				$querRangos=mysqli_query($link, $SQLRangos);
+			}
+		}
+	}
+
+//FIN GUARDADO DE RANGOS
+
+
+//PARA GUARDAR PORTABILIDAD
+
+	if ($estatusPortabilidad) {
+		if (($numerosPortados!="") || (count($_POST["pasaportesPortados"])>0)) {
+			
+			if ($numerosPortados!="") {
+				$pieces = explode(",", $numerosPortados);
+
+				foreach($pieces as $element)
+				{
+					$SQLNumerosPortados="INSERT INTO r_colas_portados (r_cola_portado_id, r_cola_portado_idCola, r_cola_portado_numOrPass, r_colas_portados_type, r_cola_portado_createdat) VALUES (Null, '$lastId', '$element', 'NUM', Now())";
+					$querNumPort=mysqli_query($link, $SQLNumerosPortados);
+				}
+			} 
+			if(count($_POST["pasaportesPortados"])>0) {
+				foreach ($_POST['pasaportesPortados'] as $idPass)
+				{
+					$SQLPassPortado="INSERT INTO r_colas_portados (r_cola_portado_id, r_cola_portado_idCola, r_cola_portado_numOrPass, r_colas_portados_type, r_cola_portado_createdat) VALUES (Null, '$lastId', '$idPass', 'PASS', Now())";
+					$queryPassPortado=mysqli_query($link, $SQLPassPortado);
+				}
+			}
+
+		}
+	}
+
+//FIN DE LA PORTABILIDAD
 
 
 	if ($resultado) {
 
 
 		//Envío la respuesta al Front para redirigir
+
 		$jsondata["success"] = true;
 		$jsondata["data"] = array(
-			'message' => "$SQLPass"
+			'message' => "La cola ha sido registrada satisfactoriamente"
 			);
 
 

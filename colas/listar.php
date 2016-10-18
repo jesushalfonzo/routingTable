@@ -60,6 +60,10 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                   <div class="x_title">
                     <h2>Listado de colas <i class="fa fa-stack-overflow "></i></h2>
                     <ul class="nav navbar-right panel_toolbox">
+
+
+                    <li><a  class="btn btn-primary btn-xs" href="../routing/index.php"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i> Volver</a></li>
+
                       <li><a href="../colas/index.php?idBlock=<?=$idBlock?>" class="btn btn-success btn-xs"><i class="fa fa-plus-circle" aria-hidden="true"></i> Agregar Cola</i></a>
                       </li>
 
@@ -106,7 +110,7 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                             <?php } ?>
 
                             <?php if (control_access("COLAS", 'ELIMINAR')) { ?>
-                            <button type="button" class="btn btn-danger btn-xs" data-id="<?=$m_bloque_id?>" data-accion="Eliminar" data-title="Eliminar Bloque <?=utf8_encode($m_bloque_nombre)?>?" data-trigger="focus" data-on-confirm="deleteBloque" data-toggle="confirmation" data-btn-ok-label="Sí" data-btn-cancel-label="Cancelar!" data-placement="top" title="Eliminar Bloque <?=utf8_encode($m_bloque_nombre)?>?">  <i class="fa fa-trash-o"> </i> Eliminar</button>
+                            <button type="button" class="btn btn-danger btn-xs" data-id="<?=$m_cola_id?>" data-accion="Eliminar" data-title="Eliminar Cola <?=utf8_encode($m_cola_name)?>?" data-trigger="focus" data-on-confirm="deleteCola" data-toggle="confirmation" data-btn-ok-label="Sí" data-btn-cancel-label="Cancelar!" data-placement="top" title="Eliminar Cola <?=utf8_encode($m_cola_name)?>?">  <i class="fa fa-trash-o"> </i> Eliminar</button>
                             <?php } ?>
                    
 
@@ -169,14 +173,14 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
 
   $('[data-toggle=confirmation]').confirmation();
 
-  function deleteBloque(){
+  function deleteCola(){
 
     var id = $(this).data('id');
     $.ajax({
-      url: "../bloques/deleteBlock.php",
+      url: "deleteCola.php",
       type: 'GET',
       enctype: 'multipart/form-data',
-      data: "idBloque="+id,
+      data: "idCola="+id,
       async: false,
       contentType: "application/json",
       dataType: "json",
@@ -192,6 +196,8 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
         else{
           $("#mensajes").css("z-index", "999");
           $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+
+          $("#dataMessage").append(data["data"]["message"]);
           $.each(data['data']['message'], function(index, val) {
             $('#dataMessage').append(val+ '<br>');
           });
