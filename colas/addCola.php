@@ -48,6 +48,16 @@ if((isset($_POST["estatusPortabilidad"]))&&($_POST["estatusPortabilidad"]!="")){
 
 if((isset($_POST["numerosPortados"]))&&($_POST["numerosPortados"]!="")){ $numerosPortados=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["numerosPortados"]))); } else { $numerosPortados=0;}
 
+	//GET NUMEROS FILTRADOS CHECK
+if((isset($_POST["estatusFiltrado"]))&&($_POST["estatusFiltrado"]!="")){ $estatusFiltrado=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusFiltrado"]))); } else { $estatusFiltrado=0;}
+//GET NUMEROS FILTRADOS
+if((isset($_POST["numerosFiltrados"]))&&($_POST["numerosFiltrados"]!="")){ $numerosFiltrados=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["numerosFiltrados"]))); } else { $numerosFiltrados=0;}
+
+//GET INICIO FILTRADO
+
+if((isset($_POST["iniciosFiltrados"]))&&($_POST["iniciosFiltrados"]!="")){ $iniciosFiltrados=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["iniciosFiltrados"]))); } else { $iniciosFiltrados=0;}
+
+
 
 $fechacompleta=date('Y-m-d H:i:s');
 if(count($aErrores)==0) { 
@@ -55,8 +65,8 @@ if(count($aErrores)==0) {
 
 //SAVE THE PRINCIPAL VALUES FOR THE CURRENT QUEUE
 
-	$SQL="INSERT INTO  routingDB.m_cola (m_cola_id ,m_cola_name ,m_cola_description ,m_cola_idBloque, m_cola_requiredOperadora, m_cola_operadoraID ,m_cola_comentRequiere ,m_cola_claveComentario ,m_cola_getreplaytoRequire ,m_cola_estatus ,m_cola_date ,
-	m_cola_updatedat)VALUES (NULL ,  '$nameCola',  '$descripcion',  '$idBloque',  '$estatusOperadora',  '$operadora',  '$estatusComment',  '$keyComments',  '$estatusReplyTo',  '$estatus',  Now(),  Now())";
+	$SQL="INSERT INTO  routingDB.m_cola (m_cola_id ,m_cola_name ,m_cola_description ,m_cola_idBloque, m_cola_idPais, m_cola_requiredOperadora, m_cola_operadoraID ,m_cola_comentRequiere ,m_cola_claveComentario ,m_cola_getreplaytoRequire, m_cola_rangoRequired, m_cola_portabilidadRequired, m_cola_jaulaRequired, m_cola_estatus ,m_cola_date ,
+	m_cola_updatedat)VALUES (NULL ,  '$nameCola',  '$descripcion',  '$idBloque', '$paisCola', '$estatusOperadora',  '$operadora',  '$estatusComment',  '$keyComments',  '$estatusReplyTo', '$estatusRango', '$estatusPortabilidad', '$estatusFiltrado',  '$estatus',  Now(),  Now())";
 	$resultado=mysqli_query($link, $SQL);
 	$lastId=mysqli_insert_id($link);
 
@@ -117,6 +127,45 @@ if(count($aErrores)==0) {
 	}
 
 //FIN DE LA PORTABILIDAD
+
+
+
+
+//PARA PROCESAR LOS NUMEROS FILTRADOS
+	if ($estatusFiltrado) {
+		if (($numerosFiltrados!="") || (count($_POST["pasaportesFiltrados"])>0) || ($iniciosFiltrados!=""))  {
+			
+			if ($numerosFiltrados!="") {
+				$pieces = explode(",", $numerosFiltrados);
+
+				foreach($pieces as $element)
+				{
+					$SQLNumerosFiltrados="INSERT INTO r_colas_filtados (r_cola_filtrado_id, r_cola_filtrado_idCola, r_cola_filtrado_valor, r_cola_filtrado_tipo, r_cola_filtrado_createdAt) VALUES (Null, '$lastId', '$element', 'COM', Now())";
+					$querNumFilt=mysqli_query($link, $SQLNumerosFiltrados);
+				}
+			} 
+			if ($iniciosFiltrados!="") {
+				$pieces = explode(",", $iniciosFiltrados);
+
+				foreach($pieces as $element)
+				{
+					$SQLIniciosFiltrados="INSERT INTO r_colas_filtados (r_cola_filtrado_id, r_cola_filtrado_idCola, r_cola_filtrado_valor, r_cola_filtrado_tipo, r_cola_filtrado_createdAt) VALUES (Null, '$lastId', '$element', 'INI', Now())";
+					$querIniFilt=mysqli_query($link, $SQLIniciosFiltrados);
+				}
+			} 
+			if(count($_POST["pasaportesFiltrados"])>0) {
+				foreach ($_POST['pasaportesFiltrados'] as $idPass)
+				{
+					$SQLPassFiltrados="INSERT INTO r_colas_filtados (r_cola_filtrado_id, r_cola_filtrado_idCola, r_cola_filtrado_valor, r_cola_filtrado_tipo, r_cola_filtrado_createdAt) VALUES (Null, '$lastId', '$idPass', 'PAS', Now())";
+					$queryPassFiltrado=mysqli_query($link, $SQLPassFiltrados);
+				}
+			}
+
+		}
+	}
+//FIN NUMEROS FILTRADOS
+
+
 
 
 	if ($resultado) {

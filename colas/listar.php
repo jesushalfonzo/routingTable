@@ -106,7 +106,7 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                           </td>
                           <td>
                             <?php if (control_access("COLAS", 'EDITAR')) { ?>
-                            <a href="../bloques/editBlock.php?idBlock=<?=$m_bloque_id?>" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Editar </a>
+                            <a href="../colas/editQueue.php?idQueue=<?=$m_cola_id?>" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Editar </a>
                             <?php } ?>
 
                             <?php if (control_access("COLAS", 'ELIMINAR')) { ?>
@@ -187,7 +187,7 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
       success: function (data) {
         if (data['success']) {
           $("#mensajes").css("z-index", "999");
-          $( "#Bloque"+id  ).slideUp();
+          $( "#Queue"+id  ).slideUp();
           $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
           $('#dataMessage').append(data['data']['message']);
           setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
