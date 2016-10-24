@@ -18,7 +18,7 @@ $m_cola_comentRequiere=$row["m_cola_comentRequiere"];
 $m_cola_claveComentario=$row["m_cola_claveComentario"];
 $m_cola_getreplaytoRequire=$row["m_cola_getreplaytoRequire"];
 $m_cola_portabilidadRequired=$row["m_cola_portabilidadRequired"];
-$m_cola_rangoRequired=$row["m_cola_getreplaytoRequire"];
+$m_cola_rangoRequired=$row["m_cola_rangoRequired"];
 $m_cola_jaulaRequired=$row["m_cola_jaulaRequired"];
 $m_cola_estatus=$row["m_cola_estatus"];
 $m_cola_date=$row["m_cola_date"];
@@ -46,19 +46,70 @@ while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
 
 //ARRAY SI TIENE PASAPORTES PORTADOS
 if ($m_cola_portabilidadRequired) {
-$pasaportesPostados=array();
-$SQL_passPortados="SELECT * FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue' AND r_colas_portados_type='PASS' ORDER BY r_cola_portado_id ASC";
-$query_passPortados=mysqli_query($link, $SQL_passPortados);
-while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
-  $m_pasaporte_id=$row_passPortados["m_pasaporte_id"];
-  $m_pasaporte_name=$row_passPortados["m_pasaporte_name"];
-  $pasaportes[$m_pasaporte_name]=$m_pasaporte_id;
+  $pasaportesPortados=array();
+  $numerosPortados=array();
+  $SQL_passPortados="SELECT * FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue' ORDER BY r_cola_portado_id ASC";
+  $query_passPortados=mysqli_query($link, $SQL_passPortados);
+  $count=0;
+  while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
+    $r_cola_portado_id=$row_passPortados["r_cola_portado_id"];
+    $r_cola_portado_idCola=$row_passPortados["r_cola_portado_idCola"];
+    $r_cola_portado_numOrPass=$row_passPortados["r_cola_portado_numOrPass"];
+    $r_colas_portados_type=$row_passPortados["r_colas_portados_type"];
 
+    if ($r_colas_portados_type=="PASS") {
+     $pasaportesPortados[$count]=intval($r_cola_portado_numOrPass);
+   }
+   elseif ($r_colas_portados_type=="NUM") {
+    $numerosPortados[$count]=$r_cola_portado_numOrPass;
+  }
+  $count++;
 }
 }
 
+//ARRAY DE PASAPORTES PERMITIDOS
+$val=0;
+$SQLPassPer="SELECT * FROM r_colas_pasaportes WHERE r_cola_pasaporte_idCola='$idQueue' ORDER BY r_cola_pasaporte_id ASC";
+$queryPassPer=mysqli_query($link,$SQLPassPer);
+while($rowPassPer=mysqli_fetch_array($queryPassPer)){
+  $permitidosPass[$val]=intval($r_cola_pasaporte_idPasaporte=$rowPassPer["r_cola_pasaporte_idPasaporte"]);
+  $val++;
+}
+//print_r($permitidosPass);
+//print_r($pasaportesPortados);
 //FIN ARRAY PORTADOS
 
+//MANEJO DE LAS JAULAS
+
+if ($m_cola_jaulaRequired) {
+  $contador=0;
+  $numFiltrados=array();
+  $PassFiltrados=array();
+  $iniciosFiltrados=array();
+
+  $SQLFiltrados="SELECT * FROM r_colas_filtados WHERE r_cola_filtrado_idCola='$idQueue'";
+  $queryFiltrados=mysqli_query($link, $SQLFiltrados);
+  while ( $rowFiltrados=mysqli_fetch_array($queryFiltrados)) {
+   $r_cola_filtrado_id=$rowFiltrados["r_cola_filtrado_id"];
+   $r_cola_filtrado_valor=$rowFiltrados["r_cola_filtrado_valor"];
+   $r_cola_filtrado_tipo=$rowFiltrados["r_cola_filtrado_tipo"];
+
+   if ($r_cola_filtrado_tipo=="COM") {
+    $numFiltrados[$contador]=$r_cola_filtrado_valor;
+  }elseif ($r_cola_filtrado_tipo=="PAS") {
+    $PassFiltrados[$contador]=intval($r_cola_filtrado_valor);
+  }elseif ($r_cola_filtrado_tipo=="INI") {
+    $iniciosFiltrados[$contador]=$r_cola_filtrado_valor;
+  }
+
+
+  $contador++;
+}
+
+}
+
+
+//print_r($PassFiltrados);
 ?>
 
 <!DOCTYPE html>
@@ -80,7 +131,10 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
       width: 100% !important;
       margin-bottom: 20px !important;
     }
-  </style>
+    hr {
+     border-color: #000000;
+   }
+ </style>
 </head>
 
 
@@ -109,6 +163,7 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
           <div class="clearfix"></div>
 
           <form class="form-horizontal form-label-left" id="formCola" name="formCola" enctype="multipart/form-data" >
+          <input type="hidden" name="idQueue" value="<?=$idQueue?>">
             <div class="row">
               <div class="col-md-12 col-xs-12">
                 <div class="x_panel">
@@ -163,16 +218,22 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
                      <div class="form-group">
                       <label class="control-label col-md-3 col-sm-3 col-xs-12" style="text-align: left;">Seleccione los pasaportes permitidos</label>
                       <div class="col-md-12 col-sm-12 col-xs-12">
+                      <input type="checkbox" name="updatePassPermitidos" value="1" id="updatePassPermitidos" style="display: none;">
                         <select name="pasaportesPermitidos[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPermitidos">
 
                           <?php 
                           foreach ($pasaportes as $nombrePasaporte => $idPasaporte) {
-
+                            if(in_array($idPasaporte, $permitidosPass)){
+                              $pracargados.=$idPasaporte.",";
+                            }
 
                             ?>
                             <option value="<?=$idPasaporte?>"><?=$nombrePasaporte?></option>
                             <?php } ?>
                           </select>
+                          <script type='text/javascript'>
+                            $('#pasaportesPermitidos').val([<?=substr($pracargados, 0, -1)?>]);
+                          </script>
                         </div>
                       </div>
                     </div>
@@ -196,6 +257,7 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
                        <label id="ReplyToText" for="EstatusReplyTo"><?=$palabraReply?></label>
                      </div>
                    </div>
+
                    <div class="col-md-3 col-sm-3 col-xs-12">
                     <label for="message">¿Requiere Operadora? :</label>
                     <div class="radio" id="OperadoraRadio">
@@ -219,6 +281,8 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
                         <option value="<?=$m_operadora_id?>" <?php if($m_operadora_id==$m_cola_operadoraID){ echo "selected='selected'";} ?>><?=$m_operadora_nombre?></option>
                         <?php } ?>
                       </select> 
+
+
                     </div>
                   </div>
 
@@ -237,7 +301,8 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
 
 
                 </div>
-              </div>
+              </div><hr>
+              
               <div class="col-md-12 col-sm-12 col-xs-12">
                 <label for="message">¿Requiere Definir Rangos? :</label>
                 <div class="radio" id="radioRango">
@@ -256,6 +321,7 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
                   $SQLRangos="SELECT * FROM r_rangos_colas WHERE r_rangos_cola_idCola='$idQueue'";
                   $queryRangos=mysqli_query($link, $SQLRangos);
                   $cantidadRangos=mysqli_num_rows($queryRangos);
+
                   while($rowRangos=mysqli_fetch_array($queryRangos)){
                     $i++;
                     $r_rangos_cola_id=$rowRangos["r_rangos_cola_id"];
@@ -283,6 +349,8 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
                     </div>
 
                   </div>
+                  <input type="hidden" id="start_count_value"  name="start_count_value" value="1" />
+                  <input type="hidden" id="class_count" name="class_count" class="class_count" value="<?=$cantidadRangos?>" />
                   <?php 
                 }
               } else{
@@ -314,89 +382,128 @@ while ($row_passPortados=mysqli_fetch_array($query_passPortados)) {
               ?>
             </div>
             <input type="hidden" id="start_count_value"  name="start_count_value" value="1" />
-            <input type="hidden" id="class_count" name="class_count" class="class_count" value="<?=$cantidadRangos?>" />
+            <input type="hidden" id="class_count" name="class_count" class="class_count" value="0" />
 
 
 
-            <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
-              <label for="message">¿Requiere definir Portabilidad? :</label>
-              <div class="radio" id="PortabilidadRadio">
 
-               <input type="checkbox" class="js-switch" id="estatusPortabilidad" name="estatusPortabilidad" <?php if($m_cola_portabilidadRequired){ echo 'checked="checked"'; $palabraPortabilidad="SÍ";} else{$palabraPortabilidad="NO";} ?> value="1"/>  
-               <label id="portabilidadText" for="estatusPortabilidad"><?=$palabraPortabilidad?></label>
-             </div>
-             <div class="radio" id="portabilidadNums" style="display: <?php if($m_cola_portabilidadRequired){ echo 'block';} else{ echo'none'; }?>;">
-
-              <div class="col-md-9 col-sm-9 col-xs-12">
-                <label>Indique los números que desea portar (presionar enter por cada número)</label>
-                <input id="tags_1" type="text" name="numerosPortados" class="tags form-control" value="" />
-                <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
-              </div>
-              <div id="pasaportesPortadosDiv" class="col-md-9 col-sm-9  col-xs-12">
-                <label>Seleccione los pasaportes a portar</label>
-                <select name="pasaportesPortados[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPortados">
-
-                 <?php 
-                 foreach ($pasaportes as $nombrePasaporte => $idPasaporte) {
-                  ?>
-                  <option value="<?=$idPasaporte?>" <?php ?>><?=$nombrePasaporte?></option>
-                  <?php } ?>
-                </select>
-              </div>
-            </div>
           </div>
+
           <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
-            <label for="message">¿Requiere filtrado? (Jaula):</label>
-            <div class="radio" id="radioFiltrado">
+           <hr>
+           <label for="message">¿Requiere definir Portabilidad? :</label>
+           <div class="radio" id="PortabilidadRadio">
 
-             <input type="checkbox" class="js-switch" id="estatusFiltrado" name="estatusFiltrado" value="1"/>  
-             <label id="filtradoText" for="estatusFiltrado">NO</label>
+             <input type="checkbox" class="js-switch" id="estatusPortabilidad" name="estatusPortabilidad" <?php if($m_cola_portabilidadRequired){ echo 'checked="checked"'; $palabraPortabilidad="SÍ";} else{$palabraPortabilidad="NO";} ?> value="1"/>  
+             <label id="portabilidadText" for="estatusPortabilidad"><?=$palabraPortabilidad?></label>
            </div>
-           <div id="masterFiltrado" class="col-md-12 col-sm-12 col-xs-12" style="display: none;">
-             <div class="row filtradoForm" id="filtradoForm"  >
-               <div class="col-md-6 col-sm-9 col-xs-12">
-                 <label>Indique los números que desea Filtrar (Si desea filtrar números completos)</label>
-                 <input id="tags_jaula" type="text" name="numerosFiltrados" class="tags form-control" value="" />
-                 <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
-               </div>
-               <div class="col-md-6 col-sm-9 col-xs-12">
-                 <label>Indique inicios de los números a Filtrar (Si desea filtrar por inicio de número)</label>
-                 <input id="tags_jaulaIni" type="text" name="iniciosFiltrados" class="tags form-control" value="" />
-                 <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
-               </div>
+           <div class="radio" id="portabilidadNums" style="display: <?php if($m_cola_portabilidadRequired){ echo 'block';} else{ echo'none'; }?>;">
 
-               <div id="pasaportesPortadosDiv" class="col-md-9 col-sm-9  col-xs-12">
-                <label>Seleccione los pasaportes a portar</label>
-                <select name="pasaportesFiltrados[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesFiltrados">
+            <div class="col-md-9 col-sm-9 col-xs-12">
+              <label>Indique los números que desea portar (presionar enter por cada número)</label>
+              <?php 
+              foreach ($numerosPortados as $pasaporte => $numero) {
+               $previos.=$numero.",";
 
-                 <?php 
-                 foreach ($pasaportes as $nombrePasaporte => $idPasaporte) {
-                  ?>
-                  <option value="<?=$idPasaporte?>"><?=$nombrePasaporte?></option>
-                  <?php } ?>
-                </select>
-              </div>
-            </div>
+             }
+             $previos = substr($previos, 0, -1);
+             ?>
+             <input id="tags_1" type="text" name="numerosPortados" class="tags form-control" value="<?=$previos?>" />
+             <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
+           </div>
+           <div id="pasaportesPortadosDiv" class="col-md-9 col-sm-9  col-xs-12">
+            <label>Seleccione los pasaportes a portar</label>
+            <select name="pasaportesPortados[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPortados">
 
+             <?php 
+             $iniciar="";
+             foreach ($pasaportes as $nombrePasaporte => $idPasaporte) {
+              if(in_array($idPasaporte, $pasaportesPortados)){
+                $iniciar.="'$idPasaporte',";
+              }
+              ?>
+              <option value="<?=$idPasaporte?>" ><?=$nombrePasaporte?></option>
+              <?php }
+              $iniciar = substr($iniciar, 0, -1);
+              ?>
+            </select>
+
+            <script type='text/javascript'>
+              $('#pasaportesPortados').val([<?=$iniciar?>]);
+            </script>
           </div>
-
         </div>
 
+        <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left: 0px;">
+          <hr>
+          <label for="message">¿Requiere filtrado? (Jaula):</label>
+          <div class="radio" id="radioFiltrado">
 
-        <div class="form-group">
-          <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
-            <button type="submit" class="btn btn-success" id="btn_enviar">Guardar</button>
-            <button type="button" class="btn btn-primary" onClick="document.location.href='listar.php?idBlock=<?=$idBlock?>'">Cancelar</button>
+           <input type="checkbox" class="js-switch" id="estatusFiltrado" name="estatusFiltrado" value="1" <?php if($m_cola_jaulaRequired){ echo 'checked="checked"'; $palabraJaula="SÍ";} else{$palabraJaula="NO";} ?>/>  
+           <label id="filtradoText" for="estatusFiltrado"><?=$palabraJaula?></label>
+         </div>
+         <div id="masterFiltrado" class="col-md-12 col-sm-12 col-xs-12" style="display:  <?php if($m_cola_jaulaRequired){ echo 'block';} else{ echo'none'; }?>;">
+           <div class="row filtradoForm" id="filtradoForm"  >
+             <div class="col-md-6 col-sm-9 col-xs-12">
+               <label>Indique los números que desea Filtrar (Si desea filtrar números completos)</label>
 
+               <?php
+               foreach ($numFiltrados as $numeros => $numeroFiltrado) {
+                 $numInit.=$numeroFiltrado.",";
+               }
+               ?>
+               <input id="tags_jaula" type="text" name="numerosFiltrados" class="tags form-control" value="<?=substr($numInit, 0, -1)?>" />
+               <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
+             </div>
+             <div class="col-md-6 col-sm-9 col-xs-12">
+               <label>Indique inicios de los números a Filtrar (Si desea filtrar por inicio de número)</label>
+                <?php
+               foreach ($iniciosFiltrados as $inicios => $inicioFiltrado) {
+                 $inicioInit.=$inicioFiltrado.",";
+               }
+               ?>
+               <input id="tags_jaulaIni" type="text" name="iniciosFiltrados" class="tags form-control" value="<?=substr($inicioInit, 0, -1)?>" />
+               <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
+             </div>
+
+             <div id="pasaportesPortadosDiv" class="col-md-9 col-sm-9  col-xs-12">
+              <label>Seleccione los pasaportes a portar</label>
+              <select name="pasaportesFiltrados[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesFiltrados">
+
+               <?php 
+               foreach ($pasaportes as $nombrePasaporte => $idPasaporte) {
+                if (in_array($idPasaporte, $PassFiltrados)) {
+                  $PassFiltrados_INI.=$idPasaporte.",";
+                }
+                ?>
+                <option value="<?=$idPasaporte?>"><?=$nombrePasaporte?></option>
+                <?php } ?>
+              </select>
+              <script type='text/javascript'>
+              $('#pasaportesFiltrados').val([<?=substr($PassFiltrados_INI, 0, -1)?>]);
+              </script>
+            </div>
           </div>
+
         </div>
 
       </div>
 
-    </form>
+
+      <div class="form-group">
+        <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+          <button type="submit" class="btn btn-success" id="btn_enviar">Guardar</button>
+          <button type="button" class="btn btn-primary" onClick="document.location.href='listar.php?idBlock=<?=$m_cola_idBloque?>'">Cancelar</button>
+
+        </div>
+      </div>
+
+    </div>
+
+  </form>
 
 
-  </div>
+</div>
 </div>
 
 
@@ -519,8 +626,10 @@ else
   var i=0;
 }
 $("#addRango").click(function(){
+
   j =parseInt($("#class_count").val());
- i =parseInt($("#class_count").val())+1;
+  if (j==0) { j="";}
+  i =parseInt($("#class_count").val())+1;
   $('#rangoForm'+j).after($("#rangoForm"+j).clone().attr("id","rangoForm"+i));
   $("#rangoForm"+i).css("display","block");
   $("#rangoForm"+i+" > div >label>a#addRango").css("display", "none");
@@ -627,6 +736,14 @@ $("#radioFiltrado").click(function() {
 <!-- /jQuery Tags Input -->
 
 
+<!--PARA DETECTAR CAMBIOS EN EL FORMULARIO Y SOLO EDITAR LO NECESARIO-->
+<script type="text/javascript">
+  $("#pasaportesPermitidos").on('change keyup paste', function () {
+    $('#updatePassPermitidos').prop('checked', true);
+});
+</script>
+<!--FIN-->
+
 <script type="text/javascript">
   $(".numeric").numeric();
   $("#remove").click(
@@ -657,7 +774,7 @@ $("#radioFiltrado").click(function() {
       var formData = new FormData($("#formCola")[0]);
 
       $.ajax({
-        url: "addCola.php",
+        url: "updateCola.php",
         type: 'POST',
         enctype: 'multipart/form-data',
         data: formData,
@@ -669,7 +786,7 @@ $("#radioFiltrado").click(function() {
           $("#mensajes").css("z-index", "999");
           $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
           $('#dataMessage').append(data['data']['message']);
-          setTimeout(function() { window.location.href = 'listar.php?idBlock=<?=$idBlock?>';}, 1000);
+          //setTimeout(function() { window.location.href = 'listar.php?idBlock=<?=$idBlock?>';}, 1000);
         } else{
           $("#mensajes").css("z-index", "999");
           $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
