@@ -112,7 +112,7 @@ if(count($aErrores)==0) {
 
 	if ($estatusRango) {
 	//GET RANGOS
-		if ((!empty($_POST["desdeRango"]) && is_array($_POST["desdeRango"]))AND !empty($_POST["hastaRango"]) && is_array($_POST["hastaRango"]) ) { 
+		if ((!empty($_POST["desdeRango"]) && is_array($_POST["desdeRango"])) AND !empty($_POST["hastaRango"]) && is_array($_POST["hastaRango"]) ) { 
 			foreach (array_combine($_POST["desdeRango"], $_POST["hastaRango"]) as $desde => $hasta) {
 		//SAVE RANGOS
 				$SQLRangos="INSERT INTO r_rangos_colas (r_rangos_cola_id, r_rangos_cola_idCola, r_rangos_cola_rangoDesde, r_rangos_cola_rangoHasta) VALUES (Null, '$idQueue', '$desde', '$hasta')";
