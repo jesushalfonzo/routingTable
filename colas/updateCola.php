@@ -55,6 +55,16 @@ if((isset($_POST["numerosFiltrados"]))&&($_POST["numerosFiltrados"]!="")){ $nume
 
 if((isset($_POST["iniciosFiltrados"]))&&($_POST["iniciosFiltrados"]!="")){ $iniciosFiltrados=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["iniciosFiltrados"]))); } else { $iniciosFiltrados=0;}
 
+
+//CHECK UPDATE PORTABILIDAD
+
+if((isset($_POST["updatePortabilidad"]))&&($_POST["updatePortabilidad"]!="")){ $updatePortabilidad=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["updatePortabilidad"]))); } else { $updatePortabilidad=0;}
+
+//CHECK UPDATE JAULAS
+if((isset($_POST["updateJaula"]))&&($_POST["updateJaula"]!="")){ $updateJaula=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["updateJaula"]))); } else { $updateJaula=0;}
+
+
+
 $fechacompleta=date('Y-m-d H:i:s');
 $resultado=true;
 if(count($aErrores)==0) { 
@@ -66,19 +76,26 @@ if(count($aErrores)==0) {
 	$updateCola=mysqli_query($link, $SQLUpdate);
 
 
-	//SI SE DES-SELECCIONA LA OPCIÓN DE FILTRADO (JAULA), BORRO DE LA TABLA r_colas_filtados TODOS LOS REGISTROS PARA QUE NO QUEDE BASURA
-	$sqlDeleteRangos="DELETE FROM r_rangos_colas WHERE r_rangos_cola_idCola='$idQueue'";
-	$queryDeletePortados=mysqli_query($link, $sqlDeleteRangos);
+	//BORRA LOS RANGOS DE LA COLA PARA VOLVERLOS A GENERAR
+	if (!$estatusRango) {
+		$sqlDeleteRangos="DELETE FROM r_rangos_colas WHERE r_rangos_cola_idCola='$idQueue'";
+		$queryDeletePortados=mysqli_query($link, $sqlDeleteRangos);
+	}
 	//FIN BORRAR JAULA
 
 	//SI SE ELIMINA (DES-SELECCIONA) LA OPCIÓN DE PORTABILIDAD, BORRO DE LA TABLA r_colas_portados TODOS LOS REGISTROS PARA QUE NO QUEDE BASURA
-	$sqlDeletePortados="DELETE FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue'";
-	$queryDeletePortados=mysqli_query($link, $sqlDeletePortados);
+	if(!$estatusPortabilidad){
+		$sqlDeletePortados="DELETE FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue'";
+		$queryDeletePortados=mysqli_query($link, $sqlDeletePortados);
+	}
 	//FIN BORRAR PORTADOS
 
 	//SI SE DES-SELECCIONA LA OPCIÓN DE FILTRADO (JAULA), BORRO DE LA TABLA r_colas_filtados TODOS LOS REGISTROS PARA QUE NO QUEDE BASURA
-	$sqlDeleteJaula="DELETE FROM r_colas_filtados WHERE r_cola_filtrado_idCola='$idQueue'";
-	$queryDeleteJaula=mysqli_query($link, $sqlDeleteJaula);
+	if (!$estatusFiltrado) {
+		$sqlDeleteJaula="DELETE FROM r_colas_filtados WHERE r_cola_filtrado_idCola='$idQueue'";
+		$queryDeleteJaula=mysqli_query($link, $sqlDeleteJaula);
+	}
+	
 	//FIN BORRAR JAULA
 
 
@@ -99,31 +116,164 @@ if(count($aErrores)==0) {
 
 			foreach ($_POST['pasaportesPermitidos'] as $idPass)
 			{
-				$SQLPass="INSERT IGNORE INTO r_colas_pasaportes (r_cola_pasaporte_id, r_cola_pasaporte_idCola, r_cola_pasaporte_idPasaporte, r_cola_pasaporte_creartedAt) VALUES (Null, '$idQueue', '$idPass', Now())";
+				$verify="SELECT r_cola_pasaporte_id FROM r_colas_pasaportes WHERE r_cola_pasaporte_idCola='$idQueue' AND r_cola_pasaporte_idPasaporte='$idPass'";
+				$queryVerify=mysqli_query($link, $verify);
+				$num=mysqli_num_rows($queryVerify);
+				if ($num==0) {
+					$SQLPass="INSERT INTO r_colas_pasaportes (r_cola_pasaporte_id, r_cola_pasaporte_idCola, r_cola_pasaporte_idPasaporte, r_cola_pasaporte_creartedAt) VALUES (Null, '$idQueue', '$idPass', Now())";
 				$queryPass=mysqli_query($link, $SQLPass);
+				}
+				
 			}
 
 		}
 //FIN PASAPORTE COLA
 
-
+	}
 
 //PARA GUARDAR LOS RANGOS EN CASO DE QUE LA COLA LOS REQUIERA
 
 	if ($estatusRango) {
 	//GET RANGOS
 		if ((!empty($_POST["desdeRango"]) && is_array($_POST["desdeRango"])) AND !empty($_POST["hastaRango"]) && is_array($_POST["hastaRango"]) ) { 
-			foreach (array_combine($_POST["desdeRango"], $_POST["hastaRango"]) as $desde => $hasta) {
+			
+				foreach ($_POST["idRango"] as $id => $key) {
+		    	$result[$key] = array(
+		        'desde' => $_POST["desdeRango"][$id],
+		        'hasta'    => $_POST["hastaRango"][$id],
+		    );
+		}
+		//print_r($result);
+
+			foreach ($result as $arrayArrango => $valor) {
+				$desde=$valor["desde"];
+				$hasta=$valor["hasta"];
+
 		//SAVE RANGOS
-				$SQLRangos="INSERT INTO r_rangos_colas (r_rangos_cola_id, r_rangos_cola_idCola, r_rangos_cola_rangoDesde, r_rangos_cola_rangoHasta) VALUES (Null, '$idQueue', '$desde', '$hasta')";
+
+				if ($arrayArrango!="") {
+					$SQLRangos="UPDATE r_rangos_colas SET r_rangos_cola_rangoDesde='$desde',  r_rangos_cola_rangoHasta='$hasta' WHERE r_rangos_cola_id=$resultado";
 				$querRangos=mysqli_query($link, $SQLRangos);
+				}
+				else{
+					 $SQLRangos="INSERT INTO r_rangos_colas (r_rangos_cola_id, r_rangos_cola_idCola, r_rangos_cola_rangoDesde, r_rangos_cola_rangoHasta) VALUES (Null, '$idQueue', '$desde', '$hasta')";
+					$querRangos=mysqli_query($link, $SQLRangos);
+				}
+				
 			}
 		}
 	}
 
 //FIN GUARDADO DE RANGOS
 
+
+//PARA GUARDAR PORTABILIDAD
+
+	if ($estatusPortabilidad AND $updatePortabilidad) {
+
+		//PARA LOS NUMEROS
+		if (($numerosPortados!="") || (count($_POST["pasaportesPortados"])>0)) {
+			
+			if ($numerosPortados!="") {
+				$pieces = explode(",", $numerosPortados);
+				$persistentes="";
+				foreach($pieces as $element)
+				{
+					$persistentes.="'".$element."',";
+						$verifyPortNum="SELECT r_cola_portado_id FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue' AND r_cola_portado_numOrPass='$element' AND r_colas_portados_type='NUM'";
+						$queryVerifyNum=mysqli_query($link, $verifyPortNum);
+						$numPorNM=mysqli_num_rows($queryVerifyNum);
+
+						if ($numPorNM==0) {
+							$SQLNumerosPortados="INSERT INTO r_colas_portados (r_cola_portado_id, r_cola_portado_idCola, r_cola_portado_numOrPass, r_colas_portados_type, r_cola_portado_createdat) VALUES (Null, '$idQueue', '$element', 'NUM', Now())";
+							$querNumPort=mysqli_query($link, $SQLNumerosPortados);
+						}
+					
+				}
+				//BORRANDO LOS QUE NO DEBAN ESTAR
+				$persistentes=substr($persistentes, 0,-1);
+				$SQLDelPNums="DELETE FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue' AND r_colas_portados_type='NUM' AND r_cola_portado_numOrPass NOT IN ($persistentes)";
+				$queryDelNUm=mysqli_query($link, $SQLDelPNums);
+			} 
+
+			//PARA LOS PASAPORTES
+			if(count($_POST["pasaportesPortados"])>0) {				
+				foreach ($_POST['pasaportesPortados'] as $idPass)
+				{	
+					$idsDel.=$idPass.",";
+					$verifyPP="SELECT r_cola_portado_id FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue' AND r_cola_portado_numOrPass='$idPass' AND r_colas_portados_type='PASS'";
+						$queryVerifyPas=mysqli_query($link, $verifyPP);
+						$numPor=mysqli_num_rows($queryVerifyPas);
+
+						if ($numPor==0) {
+							$SQLPassPortado="INSERT INTO r_colas_portados (r_cola_portado_id, r_cola_portado_idCola, r_cola_portado_numOrPass, r_colas_portados_type, r_cola_portado_createdat) VALUES (Null, '$idQueue', '$idPass', 'PASS', Now())";
+							$queryPassPortado=mysqli_query($link, $SQLPassPortado);
+						}
+
+					
+				}
+				//BORRANDO LOS QUE NO DEBAN ESTAR
+				$idsDel=substr($idsDel, 0,-1);
+				$SQLDelPass="DELETE FROM r_colas_portados WHERE r_cola_portado_idCola='$idQueue' AND r_colas_portados_type='PASS' AND r_cola_portado_numOrPass NOT IN ($idsDel)";
+				$queryDelPass=mysqli_query($link, $SQLDelPass);
+			}
+
+		}
 	}
+
+//FIN DE LA PORTABILIDAD
+
+
+//PARA GUARDAR CAMBIOS EN LAS JAULAS
+	if ($estatusFiltrado AND $updateJaula) {
+		if (($numerosFiltrados!="") || (count($_POST["pasaportesFiltrados"])>0) || ($iniciosFiltrados!=""))  {
+			
+			//NUMEROS ENTEROS
+			if ($numerosFiltrados!="") {
+				$pieces = explode(",", $numerosFiltrados);
+
+				foreach($pieces as $element)
+				{
+					$numerosPersistidos.="'".$element."',";
+
+						$verifyCOM="SELECT r_cola_filtrado_id FROM r_colas_filtados WHERE r_cola_filtrado_idCola='$idQueue' AND r_cola_filtrado_valor='$element' AND r_cola_filtrado_tipo='COM'";
+						$queryVerifyCOM=mysqli_query($link, $verifyCOM);
+						$numJaulaCom=mysqli_num_rows($queryVerifyCOM);
+						if ($numJaulaCom==0) {
+						echo $SQLNumerosFiltrados="INSERT INTO r_colas_filtados (r_cola_filtrado_id, r_cola_filtrado_idCola, r_cola_filtrado_valor, r_cola_filtrado_tipo, r_cola_filtrado_createdAt) VALUES (Null, '$idQueue', '$element', 'COM', Now())";
+							$querNumFilt=mysqli_query($link, $SQLNumerosFiltrados);
+						}
+					
+				}
+				//BORRANDO LOS NUMEROS QUE NO DEBAN ESTAR
+				$numerosPersistidos=substr($numerosPersistidos, 0,-1);
+				$SQLDelPNums="DELETE FROM r_colas_filtados WHERE r_cola_filtrado_idCola='$idQueue' AND r_cola_filtrado_tipo='COM' AND r_cola_filtrado_valor NOT IN ($numerosPersistidos)";
+				$queryDelNUm=mysqli_query($link, $SQLDelPNums);
+			} 
+
+			//INICIOS DE NUMEROS
+			if ($iniciosFiltrados!="") {
+				$pieces = explode(",", $iniciosFiltrados);
+
+				foreach($pieces as $element)
+				{
+					$SQLIniciosFiltrados="INSERT INTO r_colas_filtados (r_cola_filtrado_id, r_cola_filtrado_idCola, r_cola_filtrado_valor, r_cola_filtrado_tipo, r_cola_filtrado_createdAt) VALUES (Null, '$lastId', '$element', 'INI', Now())";
+					$querIniFilt=mysqli_query($link, $SQLIniciosFiltrados);
+				}
+			} 
+			//PASAPORTES
+			if(count($_POST["pasaportesFiltrados"])>0) {
+				foreach ($_POST['pasaportesFiltrados'] as $idPass)
+				{
+					$SQLPassFiltrados="INSERT INTO r_colas_filtados (r_cola_filtrado_id, r_cola_filtrado_idCola, r_cola_filtrado_valor, r_cola_filtrado_tipo, r_cola_filtrado_createdAt) VALUES (Null, '$lastId', '$idPass', 'PAS', Now())";
+					$queryPassFiltrado=mysqli_query($link, $SQLPassFiltrados);
+				}
+			}
+
+		}
+	}
+//FIN CAMBIOS JAULAS
+
 	if ($resultado) {
 
 
@@ -131,7 +281,7 @@ if(count($aErrores)==0) {
 
 		$jsondata["success"] = true;
 		$jsondata["data"] = array(
-			'message' => "$class_count"
+			'message' => "$SQLPass"
 			);
 
 

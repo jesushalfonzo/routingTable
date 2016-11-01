@@ -151,7 +151,7 @@ while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
                      </div>
 
                      <div class="col-md-3 col-sm-3 col-xs-12">
-                      <label for="message"> ¿Requiere Respuesta NO Nula?</label>
+                      <label for="message"> ¿Requiere Respuesta Nula?</label>
                       <div class="radio" id="ReplyToRadio">
 
                        <input type="checkbox" class="js-switch" id="estatusReplyTo" name="estatusReplyTo" value="1"/>  
@@ -185,7 +185,7 @@ while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
                   </div>
 
                   <div class="col-md-3 col-sm-3 col-xs-12">
-                    <label for="message">¿Requiere Comentario? :</label>
+                    <label for="message">¿Es Interactivo? :</label>
                     <div class="radio" id="commentRadio">
 
                      <input type="checkbox" class="js-switch" id="estatusComment" name="estatusComment" value="1"/>  
@@ -211,11 +211,11 @@ while ($row_pasaportes=mysqli_fetch_array($query_pasaportes)) {
                  <div class="row rangoForm" id="rangoForm"  >
 
                    <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                     <label>Desde</label>
+                     <label>Inicio</label>
                      <input type="text" placeholder="Desde" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
                    </div>
                    <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                    <label>Hasta</label>
+                    <label>Fin</label>
                     <input type="text" placeholder="Hasta" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
                   </div>
 

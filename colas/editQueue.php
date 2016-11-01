@@ -162,8 +162,8 @@ if ($m_cola_jaulaRequired) {
           </div>
           <div class="clearfix"></div>
 
-          <form class="form-horizontal form-label-left" id="formCola" name="formCola" enctype="multipart/form-data" >
-          <input type="hidden" name="idQueue" value="<?=$idQueue?>">
+          <form class="form-horizontal form-label-left" id="formCola"  method="POST" action="updateCola.php" name="formCola" enctype="multipart/form-data" >
+            <input type="hidden" name="idQueue" value="<?=$idQueue?>">
             <div class="row">
               <div class="col-md-12 col-xs-12">
                 <div class="x_panel">
@@ -218,7 +218,7 @@ if ($m_cola_jaulaRequired) {
                      <div class="form-group">
                       <label class="control-label col-md-3 col-sm-3 col-xs-12" style="text-align: left;">Seleccione los pasaportes permitidos</label>
                       <div class="col-md-12 col-sm-12 col-xs-12">
-                      <input type="checkbox" name="updatePassPermitidos" value="1" id="updatePassPermitidos" style="display: none;">
+                        <input type="checkbox" name="updatePassPermitidos" value="1" id="updatePassPermitidos" style="display: none;">
                         <select name="pasaportesPermitidos[]" class="select2_multiple form-control" multiple="multiple" id="pasaportesPermitidos">
 
                           <?php 
@@ -250,7 +250,7 @@ if ($m_cola_jaulaRequired) {
                      </div>
 
                      <div class="col-md-3 col-sm-3 col-xs-12">
-                      <label for="message"> ¿Requiere Respuesta NO Nula?</label>
+                      <label for="message"> ¿Requiere Respuesta Nula?</label>
                       <div class="radio" id="ReplyToRadio">
 
                        <input type="checkbox" class="js-switch" id="estatusReplyTo" name="estatusReplyTo" <?php if($m_cola_getreplaytoRequire){ echo 'checked="checked"'; $palabraReply="SÍ";} else{$palabraReply="NO";} ?> value="1"/>  
@@ -287,7 +287,7 @@ if ($m_cola_jaulaRequired) {
                   </div>
 
                   <div class="col-md-3 col-sm-3 col-xs-12">
-                    <label for="message">¿Requiere Comentario? :</label>
+                    <label for="message">¿Es interactivo? :</label>
                     <div class="radio" id="commentRadio">
 
                      <input type="checkbox" class="js-switch" id="estatusComment" name="estatusComment" <?php if($m_cola_comentRequiere){ echo 'checked="checked"'; $palabraComentario="SÍ";} else{$palabraComentario="NO";} ?> value="1"/>  
@@ -332,18 +332,19 @@ if ($m_cola_jaulaRequired) {
                     <div class="row rangoForm" id="rangoForm<?=$i?>"  >
 
                      <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                       <label>Desde</label>
-                       <input type="text" placeholder="Desde" value="<?=$r_rangos_cola_rangoDesde?>" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
+                       <label>Inicio</label>
+                       <input type="hidden" name="idRango[]" id="idRango" value="<?=$r_rangos_cola_id?>">
+                       <input type="text" placeholder="Inicio" value="<?=$r_rangos_cola_rangoDesde?>" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
                      </div>
                      <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                      <label>Hasta</label>
-                      <input type="text" placeholder="Hasta" value="<?=$r_rangos_cola_rangoHasta?>" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
+                      <label>Fin</label>
+                      <input type="text" placeholder="Fin" value="<?=$r_rangos_cola_rangoHasta?>" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
                     </div>
 
 
                     <div id="actions" class="col-md-4 col-sm-12 col-xs-12 form-group">
                       <?php if($cantidadRangos==$i){ ?><label><a href="#." id="addRango" title="Agregar nuevo rango"><i class="fa fa-plus-circle"></i>Agregar</a></label><?php } ?>
-                      | <label><a href="#." id="hide_company" title="Eliminar rango"><i class="fa fa-plus-circle"></i>Eliminar</a></label>
+                      | <label><a href="#." class="borralo" data-id="<?=$r_rangos_cola_id?>" id="hide_company" title="Eliminar rango"><i class="fa fa-plus-circle"></i>Eliminar</a></label>
 
                       <input type="text" readonly="yes"  placeholder="" class="form-control" style="background-color: #FFFFFF; border: none;">
                     </div>
@@ -358,12 +359,12 @@ if ($m_cola_jaulaRequired) {
                 <div class="row rangoForm" id="rangoForm"  >
 
                  <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                   <label>Desde</label>
-                   <input type="text" placeholder="Desde" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
+                   <label>Inicio</label>
+                   <input type="text" placeholder="Inicio" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
                  </div>
                  <div class="col-md-4 col-sm-12 col-xs-12 form-group">
-                  <label>Hasta</label>
-                  <input type="text" placeholder="Hasta" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
+                  <label>Fin</label>
+                  <input type="text" placeholder="Fin" name="hastaRango[]" id="hastaRango" class="form-control numeric input-sm">
                 </div>
 
 
@@ -395,6 +396,7 @@ if ($m_cola_jaulaRequired) {
            <div class="radio" id="PortabilidadRadio">
 
              <input type="checkbox" class="js-switch" id="estatusPortabilidad" name="estatusPortabilidad" <?php if($m_cola_portabilidadRequired){ echo 'checked="checked"'; $palabraPortabilidad="SÍ";} else{$palabraPortabilidad="NO";} ?> value="1"/>  
+             <input type="checkbox" name="updatePortabilidad" value="1" id="updatePortabilidad" style="display: block;">
              <label id="portabilidadText" for="estatusPortabilidad"><?=$palabraPortabilidad?></label>
            </div>
            <div class="radio" id="portabilidadNums" style="display: <?php if($m_cola_portabilidadRequired){ echo 'block';} else{ echo'none'; }?>;">
@@ -408,7 +410,7 @@ if ($m_cola_jaulaRequired) {
              }
              $previos = substr($previos, 0, -1);
              ?>
-             <input id="tags_1" type="text" name="numerosPortados" class="tags form-control" value="<?=$previos?>" />
+             <input id="numerosPortados" type="text" name="numerosPortados"  class="tags form-control" data-role="tagsinput" value="<?=$previos?>" />
              <div id="suggestions-container" style="position: relative; float: left; width: 250px; margin: 10px;"></div>
            </div>
            <div id="pasaportesPortadosDiv" class="col-md-9 col-sm-9  col-xs-12">
@@ -442,6 +444,7 @@ if ($m_cola_jaulaRequired) {
            <input type="checkbox" class="js-switch" id="estatusFiltrado" name="estatusFiltrado" value="1" <?php if($m_cola_jaulaRequired){ echo 'checked="checked"'; $palabraJaula="SÍ";} else{$palabraJaula="NO";} ?>/>  
            <label id="filtradoText" for="estatusFiltrado"><?=$palabraJaula?></label>
          </div>
+         <input type="checkbox" name="updateJaula" id="updateJaula" value="1">
          <div id="masterFiltrado" class="col-md-12 col-sm-12 col-xs-12" style="display:  <?php if($m_cola_jaulaRequired){ echo 'block';} else{ echo'none'; }?>;">
            <div class="row filtradoForm" id="filtradoForm"  >
              <div class="col-md-6 col-sm-9 col-xs-12">
@@ -457,7 +460,7 @@ if ($m_cola_jaulaRequired) {
              </div>
              <div class="col-md-6 col-sm-9 col-xs-12">
                <label>Indique inicios de los números a Filtrar (Si desea filtrar por inicio de número)</label>
-                <?php
+               <?php
                foreach ($iniciosFiltrados as $inicios => $inicioFiltrado) {
                  $inicioInit.=$inicioFiltrado.",";
                }
@@ -480,7 +483,7 @@ if ($m_cola_jaulaRequired) {
                 <?php } ?>
               </select>
               <script type='text/javascript'>
-              $('#pasaportesFiltrados').val([<?=substr($PassFiltrados_INI, 0, -1)?>]);
+                $('#pasaportesFiltrados').val([<?=substr($PassFiltrados_INI, 0, -1)?>]);
               </script>
             </div>
           </div>
@@ -488,7 +491,6 @@ if ($m_cola_jaulaRequired) {
         </div>
 
       </div>
-
 
       <div class="form-group">
         <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
@@ -559,7 +561,6 @@ if ($m_cola_jaulaRequired) {
     $("#estatusText").html("<b>Inactiva</b>");
   }
 });
-
 
 //MANEJO DEL CHECK DE OPERADORAS
 $("#OperadoraRadio").click(function() {
@@ -637,8 +638,6 @@ $("#addRango").click(function(){
   $("#rangoForm"+i+":input").each(function(){
     $(this).attr("id",$(this).attr("id") + i);
     $(this).attr("count",i); 
-
-
   });
   $("#class_count").val(parseInt($("#class_count").val())+1);
 
@@ -650,6 +649,7 @@ $("#addRango").click(function(){
   });
   i++;
 });
+
 
 $(document).on("click","#hide_company",function() {
  $(this).hide( "slow", function() {
@@ -720,7 +720,7 @@ $("#radioFiltrado").click(function() {
   }
 
   $(document).ready(function() {
-    $('#tags_1').tagsInput({
+    $('#numerosPortados').tagsInput({
       width: 'auto'
     });
     $('#tags_jaula').tagsInput({
@@ -732,6 +732,8 @@ $("#radioFiltrado").click(function() {
     });
     
   });
+
+
 </script>
 <!-- /jQuery Tags Input -->
 
@@ -740,52 +742,76 @@ $("#radioFiltrado").click(function() {
 <script type="text/javascript">
   $("#pasaportesPermitidos").on('change keyup paste', function () {
     $('#updatePassPermitidos').prop('checked', true);
+  });
+
+
+//PARA ACTUALIZAR PORTABILIDAD SOLO SI HAY CAMBIOS
+
+ $(".tags").on('tm:spliced', function(e, tag) {
+      alert(tag + " was pushed!");
+    });
+
+$("#pasaportesPortados").on('change keyup paste', function () {
+  $('#updatePortabilidad').prop('checked', true);
 });
-</script>
-<!--FIN-->
+  
 
-<script type="text/javascript">
-  $(".numeric").numeric();
-  $("#remove").click(
-    function(e)
-    {
-      e.preventDefault();
-      $(".numeric").removeNumeric();
-    }
-    );
+ //FIN PORTABILIDAD
 
-  $(function() {
 
-    $("#formCola").validate({
 
-     rules: {
-      nameCola: "required",
-      descripcion: "required",
-    },
+ //JAULA
+   $("#pasaportesFiltrados").on('change keyup paste', function () {
+    $('#updateJaula').prop('checked', true);
+  });
+//FIN JAULA
 
-    messages: {
-      nameCola: "Debe especificar un nombre para la cola",
-      descripcion: "Debe especificar una descripción para diferenciar los registros",
+  </script>
+  <!--FIN-->
 
-    },
+  <script type="text/javascript">
+    $(".numeric").numeric();
+    $("#remove").click(
+      function(e)
+      {
+        e.preventDefault();
+        $(".numeric").removeNumeric();
+      }
+      );
 
-    submitHandler: function(form) {
-      $(document).find("#formCola").trigger("create");
-      var formData = new FormData($("#formCola")[0]);
+   /* $(function() {
 
-      $.ajax({
-        url: "updateCola.php",
-        type: 'POST',
-        enctype: 'multipart/form-data',
-        data: formData,
-        async: false,
-        contentType: "application/json",
-        dataType: "json",
-        success: function (data) {
-         if (data['success']) {
-          $("#mensajes").css("z-index", "999");
-          $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
-          $('#dataMessage').append(data['data']['message']);
+      $("#formCola").validate({
+
+       rules: {
+        nameCola: "required",
+        descripcion: "required",
+      },
+
+      messages: {
+        nameCola: "Debe especificar un nombre para la cola",
+        descripcion: "Debe especificar una descripción para diferenciar los registros",
+
+      },
+
+      submitHandler: function(form) {
+        $(document).find("#formCola").trigger("create");
+        var formData = new FormData($("#formCola")[0]);
+
+        $.ajax({
+          url: "updateCola.php",
+          type: 'POST',
+          enctype: 'multipart/form-data',
+          data: formData,
+          async: false,
+          contentType: "application/json",
+          dataType: "json",
+          success: function (data) {
+           if (data['success']) {
+            $("#mensajes").css("z-index", "999");
+            $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+            $('#dataMessage').append(data['data']['message']);
+            console.log(data['data']['message']);
           //setTimeout(function() { window.location.href = 'listar.php?idBlock=<?=$idBlock?>';}, 1000);
         } else{
           $("#mensajes").css("z-index", "999");
@@ -808,13 +834,63 @@ $("#radioFiltrado").click(function() {
       processData: false
     });
 
-    }
-  });
+      }
+    });
 
-  });
+    });
+/*
 
 
 
+  </script>
+
+
+<script>
+//BORRAR RANGO
+$(".borralo").click(function() {
+  
+  var id = $(".borralo").data('id');
+  $.ajax({
+    url: "deleteRango.php",
+    type: 'GET',
+    enctype: 'multipart/form-data',
+    data: "idRango="+id,
+    async: false,
+    contentType: "application/json",
+    dataType: "json",
+    success: function (data) {
+      if (data['success']) {
+        $( "#Producto"+id  ).slideUp();
+        $("#mensajes").css("z-index", "999");
+        $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+        $('#dataMessage').append(data['data']['message']);
+        setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+      }
+      else{
+        $("#mensajes").css("z-index", "999");
+        $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+        $('#dataMessage').append(data['data']['message']);
+        $.each(data['data']['message'], function(index, val) {
+          $('#dataMessage').append(val+ '<br>');
+        });
+        setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 4000);
+      }
+    },
+    error: function(data) {
+     $("#mensajes").css("z-index", "777");
+     $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+     $('#dataMessage').append(data['data']['message']);
+     $.each(data['data']['message'], function(index, val) {
+      $('#dataMessage').append(val+ '<br>');
+    });
+     setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+   },
+   cache: false,
+   contentType: false,
+   processData: false
+ });
+});
+ //FIN BORRAR RANGO
 
 </script>
 
