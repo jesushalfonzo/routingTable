@@ -360,6 +360,7 @@ if ($m_cola_jaulaRequired) {
 
                  <div class="col-md-4 col-sm-12 col-xs-12 form-group">
                    <label>Inicio</label>
+                   <input type="hidden" name="idRango[]" id="idRango" value="">
                    <input type="text" placeholder="Inicio" name="desdeRango[]" id="desdeRango" class="form-control numeric input-sm">
                  </div>
                  <div class="col-md-4 col-sm-12 col-xs-12 form-group">
@@ -396,7 +397,7 @@ if ($m_cola_jaulaRequired) {
            <div class="radio" id="PortabilidadRadio">
 
              <input type="checkbox" class="js-switch" id="estatusPortabilidad" name="estatusPortabilidad" <?php if($m_cola_portabilidadRequired){ echo 'checked="checked"'; $palabraPortabilidad="SÍ";} else{$palabraPortabilidad="NO";} ?> value="1"/>  
-             <input type="checkbox" name="updatePortabilidad" value="1" id="updatePortabilidad" style="display: block;">
+             <input type="checkbox" name="updatePortabilidad" value="1" id="updatePortabilidad" style="display: none;">
              <label id="portabilidadText" for="estatusPortabilidad"><?=$palabraPortabilidad?></label>
            </div>
            <div class="radio" id="portabilidadNums" style="display: <?php if($m_cola_portabilidadRequired){ echo 'block';} else{ echo'none'; }?>;">
@@ -444,7 +445,7 @@ if ($m_cola_jaulaRequired) {
            <input type="checkbox" class="js-switch" id="estatusFiltrado" name="estatusFiltrado" value="1" <?php if($m_cola_jaulaRequired){ echo 'checked="checked"'; $palabraJaula="SÍ";} else{$palabraJaula="NO";} ?>/>  
            <label id="filtradoText" for="estatusFiltrado"><?=$palabraJaula?></label>
          </div>
-         <input type="checkbox" name="updateJaula" id="updateJaula" value="1">
+         <input type="checkbox" name="updateJaula" id="updateJaula" value="1" style="display: none;">
          <div id="masterFiltrado" class="col-md-12 col-sm-12 col-xs-12" style="display:  <?php if($m_cola_jaulaRequired){ echo 'block';} else{ echo'none'; }?>;">
            <div class="row filtradoForm" id="filtradoForm"  >
              <div class="col-md-6 col-sm-9 col-xs-12">
@@ -635,6 +636,7 @@ $("#addRango").click(function(){
   $("#rangoForm"+i).css("display","block");
   $("#rangoForm"+i+" > div >label>a#addRango").css("display", "none");
   $("#rangoForm"+i +">div >:input").val("");
+  $("#rangoForm"+i +">div >:input#idRango").val("TEMP"+i);
   $("#rangoForm"+i+":input").each(function(){
     $(this).attr("id",$(this).attr("id") + i);
     $(this).attr("count",i); 
@@ -700,6 +702,14 @@ $("#radioFiltrado").click(function() {
       placeholder: "Pasaportes permitidos",
       allowClear: true
     });
+    $(".select2_multiple").on("select2:select", function (evt) {
+      var element = evt.params.data.element;
+      var $element = $(element);
+
+      $element.detach();
+      $(this).append($element);
+      $(this).trigger("change");
+    });
   });
 </script>
 <!-- /Select2 -->
@@ -746,73 +756,79 @@ $("#radioFiltrado").click(function() {
 
 
 //PARA ACTUALIZAR PORTABILIDAD SOLO SI HAY CAMBIOS
+$(document).ready(function() {
+  $('#numerosPortados_tagsinput').on('click', function() {
+    $('#updatePortabilidad').prop('checked', true);
+  });
 
- $(".tags").on('tm:spliced', function(e, tag) {
-      alert(tag + " was pushed!");
-    });
+ $('#tags_jaula_tagsinput, #tags_jaulaIni_tagsinput').on('click', function() {
+    $('#updateJaula').prop('checked', true);
+  });
+
+});
 
 $("#pasaportesPortados").on('change keyup paste', function () {
   $('#updatePortabilidad').prop('checked', true);
 });
-  
+
 
  //FIN PORTABILIDAD
 
 
 
  //JAULA
-   $("#pasaportesFiltrados").on('change keyup paste', function () {
-    $('#updateJaula').prop('checked', true);
-  });
+ $("#pasaportesFiltrados").on('change keyup paste', function () {
+  $('#updateJaula').prop('checked', true);
+});
 //FIN JAULA
 
-  </script>
-  <!--FIN-->
+</script>
+<!--FIN-->
 
-  <script type="text/javascript">
-    $(".numeric").numeric();
-    $("#remove").click(
-      function(e)
-      {
-        e.preventDefault();
-        $(".numeric").removeNumeric();
-      }
-      );
+<script type="text/javascript">
+  $(".numeric").numeric();
+  $("#remove").click(
+    function(e)
+    {
+      e.preventDefault();
+      $(".numeric").removeNumeric();
+    }
+    );
 
-   /* $(function() {
+  $(function() {
 
-      $("#formCola").validate({
+    $("#formCola").validate({
 
-       rules: {
-        nameCola: "required",
-        descripcion: "required",
-      },
+     rules: {
+      nameCola: "required",
+      descripcion: "required",
+    },
 
-      messages: {
-        nameCola: "Debe especificar un nombre para la cola",
-        descripcion: "Debe especificar una descripción para diferenciar los registros",
+    messages: {
+      nameCola: "Debe especificar un nombre para la cola",
+      descripcion: "Debe especificar una descripción para diferenciar los registros",
 
-      },
+    },
 
-      submitHandler: function(form) {
-        $(document).find("#formCola").trigger("create");
-        var formData = new FormData($("#formCola")[0]);
+    submitHandler: function(form) {
+      $(document).find("#formCola").trigger("create");
+      var formData = new FormData($("#formCola")[0]);
 
-        $.ajax({
-          url: "updateCola.php",
-          type: 'POST',
-          enctype: 'multipart/form-data',
-          data: formData,
-          async: false,
-          contentType: "application/json",
-          dataType: "json",
-          success: function (data) {
-           if (data['success']) {
-            $("#mensajes").css("z-index", "999");
-            $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
-            $('#dataMessage').append(data['data']['message']);
-            console.log(data['data']['message']);
-          //setTimeout(function() { window.location.href = 'listar.php?idBlock=<?=$idBlock?>';}, 1000);
+      $.ajax({
+        url: "updateCola.php",
+        type: 'POST',
+        enctype: 'multipart/form-data',
+        data: formData,
+        async: false,
+        contentType: "application/json",
+        dataType: "json",
+        success: function (data) {
+         if (data['success']) {
+          $("#mensajes").css("z-index", "999");
+          $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $('#dataMessage').append(data['data']['message']);
+          console.log(data['data']['message']);
+          setTimeout(function() { window.location.href = 'listar.php?idBlock=<?=$m_cola_idBloque?>';}, 1000);
         } else{
           $("#mensajes").css("z-index", "999");
           $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
@@ -834,21 +850,19 @@ $("#pasaportesPortados").on('change keyup paste', function () {
       processData: false
     });
 
-      }
-    });
+    }
+  });
 
-    });
-/*
-
+  });
 
 
-  </script>
+</script>
 
 
 <script>
 //BORRAR RANGO
 $(".borralo").click(function() {
-  
+
   var id = $(".borralo").data('id');
   $.ajax({
     url: "deleteRango.php",

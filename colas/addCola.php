@@ -37,12 +37,8 @@ if((isset($_POST["estatusRango"]))&&($_POST["estatusRango"]!="")){ $estatusRango
 //GET CANTIDAD DE RANGOS AGREGADOS
 if((isset($_POST["class_count"]))&&($_POST["class_count"]!="")){ $class_count=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["class_count"]))); } else { $class_count=0;}
 
-
-
 //GET PORTABILITY CHECK
 if((isset($_POST["estatusPortabilidad"]))&&($_POST["estatusPortabilidad"]!="")){ $estatusPortabilidad=strip_tags(htmlentities(mysqli_real_escape_string($link, $_POST["estatusPortabilidad"]))); } else { $estatusPortabilidad=0;}
-
-
 
 	//GET NUMEROS PORTADOS
 
@@ -65,8 +61,13 @@ if(count($aErrores)==0) {
 
 //SAVE THE PRINCIPAL VALUES FOR THE CURRENT QUEUE
 
+	$MaxSQL="SELECT MAX( m_cola_posicion ) AS pos FROM m_cola WHERE m_cola_idBloque =  '$idBloque'";
+	$queryMax=mysqli_query($link, $MaxSQL);
+	$rowMax=mysqli_fetch_array($queryMax);
+	$ultimaPosicion=$rowMax["pos"]+1;
+
 	$SQL="INSERT INTO  routingDB.m_cola (m_cola_id ,m_cola_name ,m_cola_description ,m_cola_idBloque, m_cola_idPais, m_cola_requiredOperadora, m_cola_operadoraID ,m_cola_comentRequiere ,m_cola_claveComentario ,m_cola_getreplaytoRequire, m_cola_rangoRequired, m_cola_portabilidadRequired, m_cola_jaulaRequired, m_cola_estatus ,m_cola_date ,
-	m_cola_updatedat)VALUES (NULL ,  '$nameCola',  '$descripcion',  '$idBloque', '$paisCola', '$estatusOperadora',  '$operadora',  '$estatusComment',  '$keyComments',  '$estatusReplyTo', '$estatusRango', '$estatusPortabilidad', '$estatusFiltrado',  '$estatus',  Now(),  Now())";
+	m_cola_updatedat, m_cola_posicion)VALUES (NULL ,  '$nameCola',  '$descripcion',  '$idBloque', '$paisCola', '$estatusOperadora',  '$operadora',  '$estatusComment',  '$keyComments',  '$estatusReplyTo', '$estatusRango', '$estatusPortabilidad', '$estatusFiltrado',  '$estatus',  Now(),  Now(), '$ultimaPosicion')";
 	$resultado=mysqli_query($link, $SQL);
 	$lastId=mysqli_insert_id($link);
 
@@ -182,7 +183,7 @@ if(count($aErrores)==0) {
 	} else {
 		$jsondata["success"] = false;
 		$jsondata["data"] = array(
-			'message' => "Error al intentar registrar el pasaporte $query"
+			'message' => "Error al intentar registrar el pasaporte $SQL"
 			);
 	}
 

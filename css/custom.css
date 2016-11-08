@@ -4870,3 +4870,15 @@ color:#666666;
 ol,ul{
   margin-bottom: 24px !important;
 }
+ .tDnD_whileDrag{
+    border-style: dotted; 
+    border-width: 2px; 
+    border-color: #CCCCCC; 
+    /*background-color: #2A3F54; */
+    font-family: verdana, arial; 
+    border-left-width: : 4px;
+    border-left-color: red;
+    border-left-style: solid;
+    
+
+  }

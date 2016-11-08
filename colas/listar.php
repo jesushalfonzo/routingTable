@@ -30,7 +30,6 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
     <link rel="stylesheet" href="../fonts/gi/genericons.css">
     <link rel="stylesheet" href="../css/icon-picker.min.css">
 
-
   </head>
   <body class="nav-md">
     <div class="container body">
@@ -76,28 +75,35 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                   </div>
                   <div class="x_content">
                     <!-- start project list -->
-                    <table class="table table-striped projects">
+                    <table class="table table-striped projects" >
                      <thead>
                       <tr>
-                        <th style="width: 1%">#</th>
+                        <th style="width: 1%">Estatus</th>
                         <th style="width: 20%">Nombre de la cola</th>
                         <th style="width: 45%">Descripción</th>
                         <th style="width: 20%">#Acciones</th>
 
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="reordenable">
                       <?php
                       //PARA EXTRAER LOS BLOQUES
-                      $SQl_queues="SELECT * FROM m_cola WHERE m_cola_idBloque = '$idBlock' ORDER BY m_cola_date ASC";         
+                     $SQl_queues="SELECT m_cola_id, m_cola_name, m_cola_description, m_cola_estatus, m_cola_posicion AS posicion FROM m_cola WHERE m_cola_idBloque = '$idBlock' ORDER BY m_cola_posicion ASC";         
                       $queryQueues=mysqli_query($link, $SQl_queues);
                       while ($rowQueues=mysqli_fetch_array($queryQueues)) {
                         $m_cola_id=$rowQueues["m_cola_id"];
                         $m_cola_name=$rowQueues["m_cola_name"];
-                        $m_cola_descrption=$rowQueues["m_cola_descrption"];
+                        $m_cola_descrption=$rowQueues["m_cola_description"];
+                        $m_cola_estatus=$rowQueues["m_cola_estatus"];
+                        if ($m_cola_estatus) {
+                          $tipoBoton="success";
+                        } else {
+                          $tipoBoton="warning";
+                        }
+                        
                         ?>
-                        <tr id="Queue<?=$m_cola_id?>">
-                          <td>#</td>
+                        <tr id="<?=$m_cola_id?>">
+                          <td><div class="btn btn-round btn-xs btn-<?=$tipoBoton?>"><?php if($m_cola_estatus){ echo "Activa";} else{ echo "Inactiva";}?><div></td>
                           <td>
                             <a><?=utf8_encode($m_cola_name)?></a>
                           </td>
@@ -113,7 +119,7 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                             <button type="button" class="btn btn-danger btn-xs" data-id="<?=$m_cola_id?>" data-accion="Eliminar" data-title="Eliminar Cola <?=utf8_encode($m_cola_name)?>?" data-trigger="focus" data-on-confirm="deleteCola" data-toggle="confirmation" data-btn-ok-label="Sí" data-btn-cancel-label="Cancelar!" data-placement="top" title="Eliminar Cola <?=utf8_encode($m_cola_name)?>?">  <i class="fa fa-trash-o"> </i> Eliminar</button>
                             <?php } ?>
                    
-
+                            <i class="fa fa-arrows" style="float: right;"></i>
                           </td>
                         </tr>
 
@@ -121,7 +127,13 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
                       </tbody>
                     </table>
                     <!-- end project list -->
-
+                    <div class="col-md-12 col-xs-12" align="center">
+                      <form name="ordenForm" id="ordenForm">
+                        <input type="hidden" name="ordenNuevo" id="ordenNuevo" value="">
+                        <input type="hidden" name="idBloque" value="<?=$idBlock?>">
+                         <button type="submit" class="btn btn-success" id="btn_enviar" disabled="disabled">Guardar</button>
+                      </form>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -157,7 +169,8 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
 <!-- Switchery -->
 <script src="../vendors/switchery/dist/switchery.min.js"></script>
 
-
+<!--SORTABLE-->
+<script src="../js/jquery.tablednd.js"></script>
 
 <!-- starrr -->
 <script src="../js/validate/jquery.validate.js"></script>
@@ -187,7 +200,7 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
       success: function (data) {
         if (data['success']) {
           $("#mensajes").css("z-index", "999");
-          $( "#Queue"+id  ).slideUp();
+          $( "#"+id  ).slideUp();
           $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
           $('#dataMessage').append(data['data']['message']);
           setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
@@ -219,6 +232,84 @@ $m_bloque_nombre=$rowBloques["m_bloque_nombre"];
 
 </script>
 
+
+<script type="text/javascript">
+$(document).ready(function () {
+  $('#reordenable').tableDnD({
+        onDrop: function(table, row) {
+            var resultados= $.tableDnD.serialize();
+             resultados = resultados.replace(/reordenable/g, "");
+             resultados=resultados.replace(/&%5B%5D=/g, ",");
+             resultados=resultados.replace("%5B%5D=","");
+             console.log(resultados);
+             $("#ordenNuevo").val(resultados);
+             $('#btn_enviar').removeAttr("disabled");
+        }
+    });
+});
+</script>
+
+
+<script type="text/javascript">
+   $(function() {
+
+    $("#ordenForm").validate({
+
+     rules: {
+      ordenNuevo: "required",
+      idBloque: "required",
+    },
+
+    messages: {
+      ordenNuevo: "NO PUEDE ESTAR VACIO",
+      idBloque: "NO PUEDE ESTAR VACIO",
+
+    },
+
+    submitHandler: function(form) {
+      var formData = new FormData($("#ordenForm")[0]);
+
+      $.ajax({
+        url: "reorderColas.php",
+        type: 'POST',
+        enctype: 'multipart/form-data',
+        data: formData,
+        async: false,
+        contentType: "application/json",
+        dataType: "json",
+        success: function (data) {
+         if (data['success']) {
+          $("#mensajes").css("z-index", "999");
+          $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $('#dataMessage').append(data['data']['message']);
+          $('#btn_enviar').attr("disabled", true);
+           setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+        } else{
+          $("#mensajes").css("z-index", "999");
+          $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $('#dataMessage').append(data['data']['message']);
+          $.each(data['data']['message'], function(index, val) {
+            $('#dataMessage').append(val+ '<br>');
+          });
+          setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+
+
+        };
+
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+      } ,
+      cache: false,
+      contentType: false,
+      processData: false
+    });
+
+    }
+  });
+
+  });
+</script>
 
 </body>
 </html>

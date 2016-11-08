@@ -74,10 +74,10 @@ $link=Conectarse();
 
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="reordenable">
                     <?php
                       //PARA EXTRAER LOS BLOQUES
-                    $SQl_bloques="SELECT * FROM m_bloques, country_t WHERE country_id = m_bloque_paisId ORDER BY m_bloque_id ASC";         
+                    $SQl_bloques="SELECT * FROM m_bloques, country_t WHERE country_id = m_bloque_paisId ORDER BY m_bloque_posicion ASC";         
                     $queryBloques=mysqli_query($link, $SQl_bloques);
                     while ($rowBloques=mysqli_fetch_array($queryBloques)) {
                       $m_bloque_id=$rowBloques["m_bloque_id"];
@@ -86,50 +86,58 @@ $link=Conectarse();
                       $m_bloque_descripcion=$rowBloques["m_bloque_descripcion"];
 
                       ?>
-                      <tr id="Bloque<?=$m_bloque_id?>">
+                      <tr id="<?=$m_bloque_id?>">
                         <td>#</td>
                         <td>
                           <a><?=utf8_encode($m_bloque_nombre)?></a>
                         </td>
-                       <td>
-                        <p><?=utf8_encode($m_bloque_descripcion)?></p>
-                      </td>
-                      <td>
-                      <?php if (control_access("BLOQUES", 'ELIMINAR')) { ?>
-                       <a href="../bloques/editBlock.php?idBlock=<?=$m_bloque_id?>" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Editar </a>
-                       <?php } ?>
+                        <td>
+                          <p><?=utf8_encode($m_bloque_descripcion)?></p>
+                        </td>
+                        <td>
+                          <?php if (control_access("BLOQUES", 'ELIMINAR')) { ?>
+                          <a href="../bloques/editBlock.php?idBlock=<?=$m_bloque_id?>" class="btn btn-info btn-xs"><i class="fa fa-pencil"></i> Editar </a>
+                          <?php } ?>
 
-                       <?php if (control_access("BLOQUES", 'ELIMINAR')) { ?>
-                       <button type="button" class="btn btn-danger btn-xs" data-id="<?=$m_bloque_id?>" data-accion="Eliminar" data-title="Eliminar Bloque <?=utf8_encode($m_bloque_nombre)?>?" data-trigger="focus" data-on-confirm="deleteBloque" data-toggle="confirmation" data-btn-ok-label="Sí" data-btn-cancel-label="Cancelar!" data-placement="top" title="Eliminar Bloque <?=utf8_encode($m_bloque_nombre)?>?">  <i class="fa fa-trash-o"> </i> Eliminar</button>
-                       <?php } ?>
-                        <?php if (control_access("COLAS", 'VER')) { ?>
-                       <a href="../colas/listar.php?idBlock=<?=$m_bloque_id?>" class="btn btn-primary btn-xs"><i class="fa fa-stack-overflow "></i> Colas </a>
-                       <?php } ?>
+                          <?php if (control_access("BLOQUES", 'ELIMINAR')) { ?>
+                          <button type="button" class="btn btn-danger btn-xs" data-id="<?=$m_bloque_id?>" data-accion="Eliminar" data-title="Eliminar Bloque <?=utf8_encode($m_bloque_nombre)?>?" data-trigger="focus" data-on-confirm="deleteBloque" data-toggle="confirmation" data-btn-ok-label="Sí" data-btn-cancel-label="Cancelar!" data-placement="top" title="Eliminar Bloque <?=utf8_encode($m_bloque_nombre)?>?">  <i class="fa fa-trash-o"> </i> Eliminar</button>
+                          <?php } ?>
+                          <?php if (control_access("COLAS", 'VER')) { ?>
+                          <a href="../colas/listar.php?idBlock=<?=$m_bloque_id?>" class="btn btn-primary btn-xs"><i class="fa fa-stack-overflow "></i> Colas </a>
 
-                     </td>
-                   </tr>
+                          <i class="fa fa-arrows" style="float: right;"></i>
+                          <?php } ?>
 
-                   <?php } ?>
-                 </tbody>
-               </table>
-               <!-- end project list -->
+                        </td>
+                      </tr>
 
-             </div>
-           </div>
+
+                      <?php } ?>
+                    </tbody>
+                  </table>
+                  <!-- end project list -->
+                  <div class="col-md-12 col-xs-12" align="center">
+                    <form name="ordenForm" id="ordenForm">
+                      <input type="hidden" name="ordenNuevo" id="ordenNuevo" value="">
+                      <button type="submit" class="btn btn-success" id="btn_enviar" disabled="disabled">Guardar</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+
+
     </div>
   </div>
+  <!-- /page content -->
 
-
-
-</div>
-</div>
-<!-- /page content -->
-
-<!-- footer content -->
-<?php include("../common_footer.php"); ?>
-<!-- /footer content -->
+  <!-- footer content -->
+  <?php include("../common_footer.php"); ?>
+  <!-- /footer content -->
 </div>
 </div>
 
@@ -144,7 +152,8 @@ $link=Conectarse();
 
 <!-- iCheck -->
 <script src="../vendors/iCheck/icheck.min.js"></script>
-
+<!--SORTABLE-->
+<script src="../js/jquery.tablednd.js"></script>
 
 <!-- Switchery -->
 <script src="../vendors/switchery/dist/switchery.min.js"></script>
@@ -163,53 +172,128 @@ $link=Conectarse();
 
 <script>
 
-$('[data-toggle=confirmation]').confirmation();
+  $('[data-toggle=confirmation]').confirmation();
 
-function deleteBloque(){
+  function deleteBloque(){
 
-  var id = $(this).data('id');
-  $.ajax({
-    url: "../bloques/deleteBlock.php",
-    type: 'GET',
-    enctype: 'multipart/form-data',
-    data: "idBloque="+id,
-    async: false,
-    contentType: "application/json",
-    dataType: "json",
-    success: function (data) {
-      if (data['success']) {
-        $("#mensajes").css("z-index", "999");
-        $( "#Bloque"+id  ).slideUp();
-        $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
-        $('#dataMessage').append(data['data']['message']);
-        setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+    var id = $(this).data('id');
+    $.ajax({
+      url: "../bloques/deleteBlock.php",
+      type: 'GET',
+      enctype: 'multipart/form-data',
+      data: "idBloque="+id,
+      async: false,
+      contentType: "application/json",
+      dataType: "json",
+      success: function (data) {
+        if (data['success']) {
+          $("#mensajes").css("z-index", "999");
+          $( "#"+id  ).slideUp();
+          $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $('#dataMessage').append(data['data']['message']);
+          setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
 
-      }
-      else{
-        $("#mensajes").css("z-index", "999");
-        $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
-        $.each(data['data']['message'], function(index, val) {
-          $('#dataMessage').append(val+ '<br>');
-        });
-        setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 4000);
-      }
-    },
-    error: function(XMLHttpRequest, textStatus, errorThrown) { 
-      alert("Status: " + textStatus); alert("Error: " + errorThrown); 
-    } ,
-   cache: false,
-   contentType: false,
-   processData: false
+        }
+        else{
+          $("#mensajes").css("z-index", "999");
+          $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $.each(data['data']['message'], function(index, val) {
+            $('#dataMessage').append(val+ '<br>');
+          });
+          setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 4000);
+        }
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+      } ,
+      cache: false,
+      contentType: false,
+      processData: false
 
- });
+    });
 
 
-};
+  };
 
 
 </script>
 
- 
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#reordenable').tableDnD({
+      onDrop: function(table, row) {
+        var resultados= $.tableDnD.serialize();
+        resultados = resultados.replace(/reordenable/g, "");
+        resultados=resultados.replace(/&%5B%5D=/g, ",");
+        resultados=resultados.replace("%5B%5D=","");
+        console.log(resultados);
+        $("#ordenNuevo").val(resultados);
+        $('#btn_enviar').removeAttr("disabled");
+      }
+    });
+  });
+</script>
+
+<script type="text/javascript">
+   $(function() {
+
+    $("#ordenForm").validate({
+
+     rules: {
+      ordenNuevo: "required",
+      idBloque: "required",
+    },
+
+    messages: {
+      ordenNuevo: "NO PUEDE ESTAR VACIO",
+      idBloque: "NO PUEDE ESTAR VACIO",
+
+    },
+
+    submitHandler: function(form) {
+      var formData = new FormData($("#ordenForm")[0]);
+
+      $.ajax({
+        url: "reorderBloques.php",
+        type: 'POST',
+        enctype: 'multipart/form-data',
+        data: formData,
+        async: false,
+        contentType: "application/json",
+        dataType: "json",
+        success: function (data) {
+         if (data['success']) {
+          $("#mensajes").css("z-index", "999");
+          $($("#mensajes").html("<div class='alert alert-success'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $('#dataMessage').append(data['data']['message']);
+          $('#btn_enviar').attr("disabled", true);
+           setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+        } else{
+          $("#mensajes").css("z-index", "999");
+          $($("#mensajes").html("<div class='alert alert-error'><a href='#' class='close' data-dismiss='alert' id='cerrar'>&times;</a><div id='dataMessage'></div></div>").fadeIn("slow"));
+          $('#dataMessage').append(data['data']['message']);
+          $.each(data['data']['message'], function(index, val) {
+            $('#dataMessage').append(val+ '<br>');
+          });
+          setTimeout(function() { $(".alert").alert('close'); $("#mensajes").css("z-index", "-1");}, 2000);
+
+
+        };
+
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) { 
+        alert("Status: " + textStatus); alert("Error: " + errorThrown); 
+      } ,
+      cache: false,
+      contentType: false,
+      processData: false
+    });
+
+    }
+  });
+
+  });
+</script>
 </body>
 </html>
 

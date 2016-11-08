@@ -3,8 +3,8 @@
 -- http://www.phpmyadmin.net
 --
 -- Servidor: localhost
--- Tiempo de generación: 25-10-2016 a las 17:05:06
--- Versión del servidor: 5.5.52-0ubuntu0.14.04.1
+-- Tiempo de generación: 08-11-2016 a las 12:07:34
+-- Versión del servidor: 5.5.53-0ubuntu0.14.04.1
 -- Versión de PHP: 5.5.9-1ubuntu4.20
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `bitacora_acceso` (
   `b_acceso_ip` varchar(200) NOT NULL,
   `b_acceso_fecha` datetime NOT NULL,
   PRIMARY KEY (`b_acceso_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=35 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=36 ;
 
 --
 -- Volcado de datos para la tabla `bitacora_acceso`
@@ -73,7 +73,8 @@ INSERT INTO `bitacora_acceso` (`b_acceso_id`, `b_acceso_usuario`, `b_acceso_acci
 (31, 'jalfonzo', 'ACCESO PERMITIDO', '127.0.0.1', '2016-10-21 13:58:34'),
 (32, 'jalfonzo', 'ACCESO PERMITIDO', '127.0.0.1', '2016-10-24 10:41:26'),
 (33, 'jalfonzo', 'ACCESO PERMITIDO', '127.0.0.1', '2016-10-24 14:01:27'),
-(34, 'jalfonzo', 'ACCESO PERMITIDO', '127.0.0.1', '2016-10-25 08:22:43');
+(34, 'jalfonzo', 'ACCESO PERMITIDO', '127.0.0.1', '2016-10-25 08:22:43'),
+(35, 'jalfonzo', 'ACCESO PERMITIDO', '::1', '2016-11-08 11:57:53');
 
 -- --------------------------------------------------------
 
@@ -388,6 +389,7 @@ CREATE TABLE IF NOT EXISTS `m_bloques` (
   `m_bloque_descripcion` tinytext NOT NULL,
   `m_bloque_paisId` int(5) NOT NULL,
   `m_bloque_date` datetime NOT NULL,
+  `m_bloque_posicion` int(11) NOT NULL,
   PRIMARY KEY (`m_bloque_id`),
   KEY `m_bloque_paisId` (`m_bloque_paisId`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;
@@ -396,11 +398,11 @@ CREATE TABLE IF NOT EXISTS `m_bloques` (
 -- Volcado de datos para la tabla `m_bloques`
 --
 
-INSERT INTO `m_bloques` (`m_bloque_id`, `m_bloque_nombre`, `m_bloque_descripcion`, `m_bloque_paisId`, `m_bloque_date`) VALUES
-(1, 'General', 'Aquí guardo las configuraciones generales, las que no van asociadas a ningún país (En caso de existir)', 251, '2016-10-07 10:46:22'),
-(3, 'VENEZUELA', 'Para la gesti&oacute;n de todas las colas pertenecientes a Venezuela', 242, '2016-10-07 10:56:00'),
-(4, 'HONDURAS', 'Para la gesti&oacute;n de todas las colas de Honduras', 98, '2016-10-07 10:48:23'),
-(5, 'URUGUAY', 'Colas para Uruguay', 238, '2016-10-10 09:40:09');
+INSERT INTO `m_bloques` (`m_bloque_id`, `m_bloque_nombre`, `m_bloque_descripcion`, `m_bloque_paisId`, `m_bloque_date`, `m_bloque_posicion`) VALUES
+(1, 'General', 'Aquí guardo las configuraciones generales, las que no van asociadas a ningún país (En caso de existir)', 251, '2016-10-07 10:46:22', 0),
+(3, 'VENEZUELA', 'Para la gesti&oacute;n de todas las colas pertenecientes a Venezuela', 242, '2016-10-07 10:56:00', 0),
+(4, 'HONDURAS', 'Para la gesti&oacute;n de todas las colas de Honduras', 98, '2016-10-07 10:48:23', 0),
+(5, 'URUGUAY', 'Colas para Uruguay', 238, '2016-10-10 09:40:09', 0);
 
 -- --------------------------------------------------------
 
@@ -425,6 +427,7 @@ CREATE TABLE IF NOT EXISTS `m_cola` (
   `m_cola_estatus` tinyint(1) NOT NULL,
   `m_cola_date` datetime NOT NULL,
   `m_cola_updatedat` datetime NOT NULL,
+  `m_cola_posicion` int(11) NOT NULL,
   PRIMARY KEY (`m_cola_id`),
   KEY `m_cola_idBloque` (`m_cola_idBloque`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=25 ;
@@ -433,13 +436,13 @@ CREATE TABLE IF NOT EXISTS `m_cola` (
 -- Volcado de datos para la tabla `m_cola`
 --
 
-INSERT INTO `m_cola` (`m_cola_id`, `m_cola_name`, `m_cola_description`, `m_cola_idBloque`, `m_cola_idPais`, `m_cola_requiredOperadora`, `m_cola_operadoraID`, `m_cola_comentRequiere`, `m_cola_claveComentario`, `m_cola_getreplaytoRequire`, `m_cola_rangoRequired`, `m_cola_portabilidadRequired`, `m_cola_jaulaRequired`, `m_cola_estatus`, `m_cola_date`, `m_cola_updatedat`) VALUES
-(1, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28'),
-(2, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28'),
-(3, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28'),
-(4, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28'),
-(23, 'Cola de pruebas', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-17 10:45:28', '2016-10-25 08:40:35'),
-(24, 'eeee', 'dfgdsfgsd', 4, 69, 0, 0, 0, '', 0, 1, 0, 0, 0, '2016-10-24 17:07:06', '2016-10-24 17:08:41');
+INSERT INTO `m_cola` (`m_cola_id`, `m_cola_name`, `m_cola_description`, `m_cola_idBloque`, `m_cola_idPais`, `m_cola_requiredOperadora`, `m_cola_operadoraID`, `m_cola_comentRequiere`, `m_cola_claveComentario`, `m_cola_getreplaytoRequire`, `m_cola_rangoRequired`, `m_cola_portabilidadRequired`, `m_cola_jaulaRequired`, `m_cola_estatus`, `m_cola_date`, `m_cola_updatedat`, `m_cola_posicion`) VALUES
+(1, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28', 1),
+(2, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28', 2),
+(3, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28', 4),
+(4, 'Cola de pruebasxxxx', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-07 00:00:00', '2016-10-24 17:02:28', 3),
+(23, 'Cola de pruebas', 'Cola de pruebas para Rep&uacute;blicaxxx', 4, 229, 0, 0, 0, '', 0, 1, 0, 0, 1, '2016-10-17 10:45:28', '2016-10-25 08:40:35', 5),
+(24, 'eeee', 'dfgdsfgsd', 4, 69, 0, 0, 0, '', 0, 1, 0, 0, 0, '2016-10-24 17:07:06', '2016-10-24 17:08:41', 6);
 
 -- --------------------------------------------------------
 

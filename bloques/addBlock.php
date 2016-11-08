@@ -20,7 +20,11 @@ $fechacompleta=date('Y-m-d H:i:s');
 
 if(count($aErrores)==0) { 
 
-	$query = "INSERT INTO m_bloques (m_bloque_id, m_bloque_nombre, m_bloque_descripcion, m_bloque_paisId, m_bloque_date) VALUES (Null, '$nameBlock', '$description', '$countryBlock', Now())";
+	$MaxSQL="SELECT MAX( m_bloque_posicion ) AS pos FROM m_bloques ";
+	$queryMax=mysqli_query($link, $MaxSQL);
+	$rowMax=mysqli_fetch_array($queryMax);
+	$ultimaPosicion=$rowMax["pos"]+1;
+	$query = "INSERT INTO m_bloques (m_bloque_id, m_bloque_nombre, m_bloque_descripcion, m_bloque_paisId, m_bloque_date, m_bloque_posicion) VALUES (Null, '$nameBlock', '$description', '$countryBlock', Now(), '$ultimaPosicion')";
 	$resultado = mysqli_query($link, $query);
 	$lastshit=mysqli_insert_id($link);
 
@@ -29,7 +33,7 @@ if(count($aErrores)==0) {
 		//Envío la respuesta al Front para redirigir
 		$jsondata["success"] = true;
 		$jsondata["data"] = array(
-			'message' => "Bloque rinsertado exitosamente... "
+			'message' => "Bloque insertado exitosamente... "
 			);
 
 
